@@ -1,5 +1,5 @@
-# Built artifact (regenerate via scripts/build.sh).
-index.html
+# index.html is a generated artifact (regenerate via scripts/build.sh) but
+# is committed so GitHub Pages can serve it without a build step.
 
 # OS / editor cruft
 .DS_Store
