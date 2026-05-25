@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA World Cup 2026 — Pathogen Risk Screening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #1a1a1a;
+    --ink-soft:   #4a4a4a;
+    --ink-faint:  #8a8a8a;
+    --rule:       #d8d4cc;
+    --rule-soft:  #ebe7df;
+    --paper:      #faf7f2;
+    --paper-tint: #f3efe7;
+    --accent:     #2f5061;
+    --accent-soft:#5a7a8a;
+    --warn:       #a04545;
+    --warn-soft:  #f0e0e0;
+    --priority:   #2f5061;
+    --excluded:   #b0a89a;
+    --under-eval: #c25a4a;
+    --unassessed: #d8d4cc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--paper); color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .frame { max-width: 1100px; margin: 0 auto; padding: 60px 48px 80px; }
+
+  /* === Masthead === */
+  .masthead {
+    border-top: 3px solid var(--ink); border-bottom: 1px solid var(--rule);
+    padding: 22px 0 18px; margin-bottom: 32px;
+  }
+  .eyebrow-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px; margin-bottom: 18px;
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .masthead-tools { display: flex; align-items: center; gap: 18px; }
+  .logo-row { display: flex; align-items: center; gap: 16px; }
+  .logo {
+    height: 28px; display: flex; align-items: center; flex-shrink: 0;
+    text-decoration: none;
+    transition: opacity 0.18s ease;
+  }
+  .logo img {
+    height: 100%; width: auto; display: block;
+    transition: filter 0.18s ease;
+  }
+  .logo:hover { opacity: 1; }
+  .logo:hover img { filter: none !important; }
+  .logo-divider {
+    width: 1px; height: 22px; background: var(--rule); display: inline-block;
+  }
+  /* Apply the Epistorm-style muted treatment so both marks live on the
+     paper background without screaming. ACCIDDA's source is a white mark,
+     so invert(1) first to flip it dark before the muting chain. ACCIDDA
+     also runs a touch larger + heavier (darker + fuller opacity) so it
+     reads as cleanly as the wordmark on a busy masthead. */
+  .logo-accidda { height: 34px; }
+  .logo-accidda img {
+    filter: invert(1) brightness(0.45) contrast(1.2);
+    opacity: 0.95;
+  }
+  .logo-insightnet img {
+    filter: grayscale(1) brightness(0.6) contrast(1.1);
+    opacity: 0.85;
+  }
+
+  .title-block { margin-bottom: 16px; }
+  .title {
+    font-family: 'Spectral', serif; font-weight: 600;
+    font-size: 38px; line-height: 1.1; letter-spacing: -0.02em;
+    color: var(--ink); margin-bottom: 8px;
+  }
+  .title-secondary {
+    font-family: 'Spectral', serif; font-weight: 400; font-style: italic;
+    font-size: 19px; color: var(--ink-soft); letter-spacing: -0.01em;
+  }
+
+  .topnav {
+    display: flex; gap: 28px; margin-top: 18px;
+    border-top: 1px solid var(--rule); padding-top: 14px;
+  }
+  .topnav-link {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink); text-decoration: none;
+    padding: 4px 0; border-bottom: 2px solid transparent;
+    cursor: pointer; background: none; border-left: none; border-right: none; border-top: none;
+  }
+  .topnav-link:hover { color: var(--ink); border-bottom-color: var(--ink-faint); }
+  .topnav-link.is-active { color: var(--ink); border-bottom-color: var(--ink); }
+  .topnav-link.is-disabled { color: var(--ink-faint); opacity: 0.55; cursor: not-allowed; }
+  .topnav-link.is-disabled:hover { border-bottom-color: transparent; }
+  .topnav-soon {
+    display: inline-block; margin-left: 6px;
+    font-size: 9px; letter-spacing: 0.1em;
+    color: var(--ink-faint); background: var(--paper-tint);
+    padding: 1px 5px; vertical-align: 1px;
+  }
+
+  /* === View switching === */
+  .view { display: none; }
+  .view.is-active { display: block; }
+
+  /* === Lead === */
+  .lead { margin-bottom: 48px; display: grid; grid-template-columns: 2fr 1fr; gap: 36px; }
+  .lead-main p {
+    font-family: 'Spectral', serif; font-size: 17px; line-height: 1.55;
+    color: var(--ink-soft); margin-bottom: 14px;
+  }
+  .lead-main p strong { color: var(--ink); font-weight: 600; }
+  .lead-side {
+    padding: 20px 22px; border: 1px solid var(--rule); background: var(--paper-tint);
+  }
+  .lead-side-h {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px;
+  }
+  .lead-side p {
+    font-family: 'Spectral', serif; font-size: 14px; line-height: 1.55;
+    color: var(--ink-soft); margin-bottom: 10px;
+  }
+
+  /* === Overview stats === */
+  .overview-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--rule);
+    border: 1px solid var(--rule); margin-bottom: 48px;
+  }
+  .ostat { background: var(--paper); padding: 22px 22px 20px; }
+  .ostat-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 10px;
+  }
+  .ostat-value {
+    font-family: 'Spectral', serif; font-weight: 600;
+    font-size: 42px; line-height: 1; color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .ostat-accent .ostat-value { color: var(--accent); }
+
+  /* === Overview entries === */
+  .overview-section-h {
+    font-family: 'Spectral', serif; font-weight: 600; font-size: 22px;
+    letter-spacing: -0.01em; color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .overview-note {
+    font-family: 'Spectral', serif; font-style: italic;
+    font-size: 14px; color: var(--ink-faint); margin-bottom: 24px;
+  }
+  .filter-bar {
+    display: flex; gap: 6px; align-items: center; margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-soft); background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 5px 10px; cursor: pointer;
+    transition: all 0.12s ease;
+  }
+  .filter-chip:hover { border-color: var(--ink-faint); }
+  .filter-chip.is-active {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .filter-count { margin-left: 6px; opacity: 0.6; font-size: 9px; }
+
+  .filter-spacer { flex: 1; }
+  .reset-all-btn {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--warn); background: none;
+    border: 1px solid var(--warn-soft);
+    padding: 5px 10px; cursor: pointer;
+  }
+  .reset-all-btn:hover { background: var(--warn); color: var(--paper); border-color: var(--warn); }
+  .reset-all-btn[disabled] {
+    color: var(--ink-faint); border-color: var(--rule); cursor: not-allowed; background: none;
+  }
+
+  .overview-entries { border-top: 1px solid var(--ink); }
+  .oentry {
+    display: grid; grid-template-columns: 14px 1fr auto 24px;
+    gap: 16px; align-items: start;
+    padding: 18px 6px; border-bottom: 1px solid var(--rule-soft);
+    cursor: pointer; transition: background 0.12s ease;
+    text-decoration: none; color: inherit;
+  }
+  .oentry:hover { background: var(--paper-tint); }
+  .ogroup-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    margin-top: 7px; background: var(--unassessed);
+  }
+  .ogroup-dot.priority   { background: var(--priority); }
+  .ogroup-dot.excluded   { background: var(--excluded); }
+  .ogroup-dot.under_eval { background: var(--under-eval); }
+  .ogroup-dot.unassessed { background: var(--unassessed); border: 1px solid var(--ink-faint); }
+
+  .oentry-body { min-width: 0; }
+  .oentry-eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 4px;
+  }
+  .oentry-eyebrow .endemic-tag { color: var(--accent-soft); }
+  .oentry-eyebrow .nonendemic-tag { color: var(--warn); }
+  .oentry-eyebrow .overridden-tag {
+    color: var(--accent); margin-left: 8px;
+    border: 1px solid var(--accent); padding: 0 5px;
+    letter-spacing: 0.12em;
+  }
+  .oentry-h {
+    font-family: 'Spectral', serif; font-weight: 600;
+    font-size: 19px; line-height: 1.2; color: var(--ink);
+    letter-spacing: -0.01em; margin-bottom: 4px;
+  }
+  .oentry-desc {
+    font-family: 'Spectral', serif; font-size: 14px; line-height: 1.45;
+    color: var(--ink-soft);
+  }
+
+  .oentry-stats { display: flex; gap: 22px; align-items: flex-start; }
+  .ostat-mini { text-align: right; }
+  .ostat-mini-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 4px;
+  }
+  .ostat-mini-value {
+    font-family: 'Spectral', serif; font-weight: 600; font-size: 18px;
+    color: var(--ink); line-height: 1;
+  }
+  .ostat-mini-value.muted { color: var(--ink-faint); font-weight: 400; }
+
+  .oentry-arrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 14px;
+    color: var(--ink-faint); align-self: center;
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+  .oentry:hover .oentry-arrow { color: var(--ink); transform: translateX(2px); }
+
+  /* === Detail view === */
+  .detail-back {
+    display: inline-block; margin-bottom: 24px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-soft); text-decoration: none;
+    background: none; border: none; cursor: pointer; padding: 0;
+  }
+  .detail-back:hover { color: var(--ink); }
+
+  .detail-header {
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+    padding: 22px 0 22px;
+    margin-bottom: 28px;
+  }
+  .detail-eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .detail-dot {
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+    background: var(--unassessed);
+  }
+  .detail-dot.priority   { background: var(--priority); }
+  .detail-dot.excluded   { background: var(--excluded); }
+  .detail-dot.under_eval { background: var(--under-eval); }
+  .detail-dot.unassessed { background: var(--unassessed); border: 1px solid var(--ink-faint); }
+
+  .detail-title {
+    font-family: 'Spectral', serif; font-weight: 600;
+    font-size: 34px; line-height: 1.1; letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .detail-status {
+    font-family: 'Spectral', serif; font-style: italic;
+    font-size: 16px; color: var(--ink-soft);
+  }
+  .detail-status .was {
+    color: var(--ink-faint); font-style: normal; margin-left: 12px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+
+  .detail-reason {
+    margin-bottom: 36px; padding: 18px 22px;
+    background: var(--paper-tint); border-left: 3px solid var(--accent);
+    font-family: 'Spectral', serif; font-size: 16px; line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  .detail-reason strong { color: var(--ink); }
+
+  .detail-cols {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 48px; margin-bottom: 36px;
+  }
+  @media (max-width: 800px) {
+    .detail-cols { grid-template-columns: 1fr; gap: 32px; }
+  }
+  .detail-col-h {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 14px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--rule);
+  }
+
+  /* Decision trace */
+  .trace-step {
+    display: grid; grid-template-columns: 22px 1fr auto;
+    gap: 12px; align-items: baseline;
+    padding: 10px 0; border-bottom: 1px solid var(--rule-soft);
+  }
+  .trace-num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--ink-faint);
+  }
+  .trace-label {
+    font-family: 'Spectral', serif; font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .trace-value {
+    font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 12px;
+    letter-spacing: 0.06em; color: var(--ink);
+    text-transform: uppercase;
+  }
+  .trace-step.is-decisive {
+    background: var(--paper-tint);
+    margin-left: -10px; padding-left: 10px;
+    padding-right: 10px; margin-right: -10px;
+    border-bottom-color: var(--accent);
+  }
+  .trace-step.is-decisive .trace-value { color: var(--accent); }
+  .trace-step.is-muted .trace-label,
+  .trace-step.is-muted .trace-value { color: var(--ink-faint); }
+
+  /* Edit form */
+  .edit-section { margin-bottom: 24px; }
+  .edit-section-h {
+    font-family: 'Spectral', serif; font-weight: 600;
+    font-size: 13px; color: var(--ink);
+    margin-bottom: 10px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .edit-group { margin-bottom: 16px; }
+  .edit-label {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px;
+    color: var(--ink-soft); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .edit-label .qnum {
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    color: var(--ink-faint); letter-spacing: 0.08em;
+    background: var(--paper-tint); padding: 1px 5px;
+  }
+  .edit-label .dirty-mark {
+    margin-left: auto; color: var(--accent); font-size: 9px;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* Tri-state radio chips */
+  .tristate { display: flex; gap: 4px; }
+  .tristate-opt {
+    flex: 1; text-align: center;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 6px 4px; border: 1px solid var(--rule);
+    background: var(--paper); color: var(--ink-soft);
+    cursor: pointer; transition: all 0.12s ease;
+  }
+  .tristate-opt:hover { border-color: var(--ink-faint); }
+  .tristate-opt.is-selected {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+
+  /* Numeric inputs */
+  .num-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px;
+  }
+  .num-cell {
+    display: grid; grid-template-columns: minmax(64px, max-content) 1fr;
+    gap: 10px; align-items: center;
+  }
+  .num-label {
+    font-family: 'Spectral', serif; font-style: italic;
+    font-size: 14px; color: var(--ink);
+    text-align: right; white-space: nowrap;
+  }
+  .num-input {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    padding: 5px 7px; border: 1px solid var(--rule);
+    background: var(--paper); color: var(--ink);
+    width: 100%;
+  }
+  .num-input:focus { outline: none; border-color: var(--accent); }
+  .num-input.is-dirty { background: var(--paper-tint); border-color: var(--accent); }
+
+  /* Action buttons */
+  .detail-actions {
+    display: flex; gap: 12px; margin-top: 28px;
+    padding-top: 24px; border-top: 1px solid var(--rule);
+  }
+  .btn {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 8px 14px; border: 1px solid var(--ink);
+    background: var(--paper); color: var(--ink);
+    cursor: pointer; transition: all 0.12s ease;
+  }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn:disabled {
+    border-color: var(--rule); color: var(--ink-faint); cursor: not-allowed;
+    background: var(--paper);
+  }
+  .btn:disabled:hover { background: var(--paper); color: var(--ink-faint); }
+  .btn-warn { border-color: var(--warn); color: var(--warn); }
+  .btn-warn:hover { background: var(--warn); color: var(--paper); }
+
+  /* Provenance footer */
+  .detail-provenance {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.12em; color: var(--ink-faint);
+    margin-top: 24px; padding-top: 16px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .detail-provenance strong { color: var(--ink-soft); margin-right: 6px; font-weight: 500; }
+
+  /* === About modal === */
+  .about-link {
+    background: none; border: 1px solid var(--rule);
+    padding: 5px 12px; cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-soft);
+    transition: all 0.15s ease; white-space: nowrap;
+  }
+  .about-link:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  .about-overlay {
+    position: fixed; inset: 0;
+    background: rgba(26, 26, 26, 0.4);
+    display: none; z-index: 100;
+    align-items: flex-start; justify-content: center;
+    padding: 60px 24px; overflow-y: auto;
+    -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  }
+  .about-overlay.active { display: flex; }
+  .about-modal {
+    background: var(--paper); width: 100%; max-width: 720px;
+    border: 1px solid var(--ink);
+    box-shadow: 0 8px 40px rgba(26, 26, 26, 0.15);
+  }
+  .about-header {
+    padding: 28px 36px 20px; border-bottom: 2px solid var(--ink);
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px;
+  }
+  .about-title {
+    font-family: 'Spectral', serif; font-weight: 600;
+    font-size: 24px; letter-spacing: -0.01em;
+  }
+  .about-close {
+    background: none; border: none; font-size: 22px; cursor: pointer;
+    color: var(--ink-faint); padding: 4px 8px; line-height: 1;
+  }
+  .about-close:hover { color: var(--ink); }
+  .about-body {
+    padding: 24px 36px 36px;
+    font-family: 'Spectral', serif; font-size: 15px; line-height: 1.65;
+    color: var(--ink-soft);
+  }
+  .about-body p { margin-bottom: 12px; }
+  .about-body strong { color: var(--ink); font-weight: 600; }
+  .about-body code {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+    background: var(--paper-tint); padding: 1px 5px; color: var(--ink);
+  }
+
+  /* === Masthead settings strip (global Q) === */
+  .masthead-settings {
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 14px; padding: 10px 0 0;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .masthead-settings .setting-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.16em; color: var(--ink-faint);
+  }
+  .masthead-settings .setting-input {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    letter-spacing: 0.05em; text-transform: none;
+    padding: 4px 8px; border: 1px solid var(--rule);
+    background: var(--paper); color: var(--ink);
+    width: 120px;
+  }
+  .masthead-settings .setting-input:focus { outline: none; border-color: var(--accent); }
+  .masthead-settings .setting-input.is-dirty { border-color: var(--accent); background: var(--paper-tint); }
+  .masthead-settings .setting-aux {
+    color: var(--ink-faint); font-size: 10px;
+    letter-spacing: 0.12em;
+  }
+  .masthead-settings .setting-reset {
+    background: none; border: none; cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.14em; color: var(--ink-faint);
+    text-transform: uppercase; padding: 2px 6px;
+  }
+  .masthead-settings .setting-reset:hover { color: var(--ink); }
+
+  /* === Detail view: computed values + Run button === */
+  .computed-section {
+    margin-top: 36px; padding: 22px;
+    border: 1px solid var(--rule); background: var(--paper-tint);
+  }
+  .computed-h {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .computed-h .stale-tag {
+    color: var(--warn); border: 1px solid var(--warn);
+    padding: 1px 6px; letter-spacing: 0.14em;
+  }
+  .computed-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px 24px; margin-bottom: 16px;
+  }
+  .computed-cell {
+    border-left: 2px solid var(--rule);
+    padding-left: 12px;
+  }
+  .computed-cell.is-fresh { border-left-color: var(--accent); }
+  .computed-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 4px;
+  }
+  .computed-value {
+    font-family: 'Spectral', serif; font-weight: 600;
+    font-size: 22px; color: var(--ink); line-height: 1.1;
+  }
+  .computed-sd {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--ink-faint); margin-left: 4px; font-weight: 400;
+  }
+  .computed-baseline {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--ink-faint); margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+  .run-actions {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--rule);
+  }
+  .run-meta {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--ink-faint); letter-spacing: 0.06em;
+  }
+  .btn-run {
+    border-color: var(--accent); color: var(--accent);
+    background: var(--paper);
+  }
+  .btn-run:hover { background: var(--accent); color: var(--paper); }
+
+  /* === Custom (Add Your Own) view === */
+  .custom-intro {
+    margin-bottom: 28px;
+    font-family: 'Spectral', serif; font-size: 16px; line-height: 1.55;
+    color: var(--ink-soft); max-width: 700px;
+  }
+  .custom-intro strong { color: var(--ink); }
+  .custom-form {
+    border: 1px solid var(--rule); padding: 28px 32px;
+    background: var(--paper-tint); margin-bottom: 36px;
+  }
+  .custom-form-h {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 18px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--rule);
+  }
+  .custom-form .form-row {
+    display: grid; grid-template-columns: 140px 1fr;
+    gap: 16px; align-items: center;
+    padding: 8px 0;
+  }
+  .custom-form .form-label {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .custom-form .form-label .req {
+    color: var(--warn); margin-left: 4px;
+  }
+  .custom-form .form-input {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 14px;
+    padding: 6px 9px; border: 1px solid var(--rule);
+    background: var(--paper); color: var(--ink);
+    width: 100%;
+  }
+  .custom-form .form-input:focus { outline: none; border-color: var(--accent); }
+  .custom-form-section-h {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 18px 0 8px;
+    padding-top: 14px; border-top: 1px solid var(--rule);
+  }
+  .custom-form-actions {
+    margin-top: 22px; padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    display: flex; gap: 12px; align-items: center;
+  }
+  .form-error {
+    color: var(--warn); font-size: 13px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    margin-left: auto;
+  }
+  .custom-list-h {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 14px;
+  }
+  .custom-list-empty {
+    font-family: 'Spectral', serif; font-style: italic; font-size: 14px;
+    color: var(--ink-faint); padding: 14px 0;
+  }
+
+  .custom-tag {
+    color: var(--accent); margin-left: 8px;
+    border: 1px solid var(--accent); padding: 0 5px;
+    letter-spacing: 0.12em;
+  }
+
+  /* === Derivation block (under computed values) === */
+  .derivation {
+    margin-top: 18px; padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+  .derivation-h {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .derivation-h .src-tag {
+    font-size: 9px; letter-spacing: 0.14em;
+    color: var(--ink-faint); background: var(--paper);
+    border: 1px solid var(--rule); padding: 1px 6px;
+  }
+  .derivation-h .src-tag.is-sim { color: var(--accent); border-color: var(--accent); }
+  .d-eq {
+    display: grid; grid-template-columns: 110px 1fr;
+    gap: 16px; padding: 10px 0;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .d-eq:last-child { border-bottom: none; }
+  .d-label {
+    font-family: 'Spectral', serif; font-weight: 600; font-size: 14px;
+    color: var(--ink); padding-top: 4px;
+  }
+  .d-math { display: flex; flex-direction: column; gap: 4px; }
+  .d-line {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    color: var(--ink-soft); line-height: 1.5;
+  }
+  .d-line-form {
+    color: var(--ink-faint); font-style: italic;
+    font-family: 'Spectral', serif; font-size: 13px;
+  }
+  .d-result {
+    color: var(--ink); font-weight: 600;
+    font-size: 14px; padding-top: 2px;
+  }
+  .d-result .d-sd {
+    font-weight: 400; color: var(--ink-faint); margin-left: 4px;
+  }
+  .d-cost-input {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    padding: 3px 7px; border: 1px solid var(--rule);
+    background: var(--paper); color: var(--ink);
+    width: 90px;
+  }
+  .d-cost-input:focus { outline: none; border-color: var(--accent); }
+  .d-cost-input.is-dirty {
+    border-color: var(--accent); background: var(--paper-tint);
+  }
+  .d-empty {
+    font-family: 'Spectral', serif; font-style: italic; font-size: 13px;
+    color: var(--ink-faint); padding: 14px 0;
+  }
+
+  /* Footnote / footer */
+  .footnote-block {
+    margin-top: 64px; padding-top: 20px;
+    border-top: 1px solid var(--rule);
+  }
+  .footnote {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.12em; color: var(--ink-faint);
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+
+  <header class="masthead">
+    <div class="eyebrow-row">
+      <div class="eyebrow">IDCUP 26 &nbsp;—&nbsp; ACCIDDA &nbsp;×&nbsp; Insight Net</div>
+      <div class="masthead-tools">
+        <div class="logo-row">
+          <a class="logo logo-accidda" href="https://accidda.org/" target="_blank" rel="noopener" title="ACCIDDA — opens in new tab">
+            <img src="__LOGO_ACCIDDA__" alt="ACCIDDA">
+          </a>
+          <span class="logo-divider"></span>
+          <a class="logo logo-insightnet" href="https://insightnet.us/" target="_blank" rel="noopener" title="Insight Net — opens in new tab">
+            <img src="__LOGO_INSIGHTNET__" alt="Insight Net">
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="title-block">
+      <h1 class="title">Pathogen Risk Screening</h1>
+      <p class="title-secondary">An interactive companion to the World Cup 2026 threat-assessment protocol.</p>
+    </div>
+
+    <nav class="topnav">
+      <a class="topnav-link" id="nav-overview" href="#/">Overview</a>
+      <a class="topnav-link" id="nav-custom"   href="#/custom">Add Your Own</a>
+      <button class="topnav-link" id="about-open" style="margin-left:auto;">About &amp; Methodology</button>
+    </nav>
+
+    <div class="masthead-settings">
+      <span class="setting-label">Risk threshold Q</span>
+      <input type="number" class="setting-input" id="threshold-q" step="any" inputmode="decimal">
+      <span class="setting-aux">USD &nbsp;·&nbsp; default <span id="threshold-q-default">—</span></span>
+      <button class="setting-reset" id="threshold-q-reset" title="Reset Q to default">reset</button>
+    </div>
+  </header>
+
+  <!-- ============ OVERVIEW VIEW ============ -->
+  <section id="view-overview" class="view">
+
+    <section class="lead">
+      <div class="lead-main">
+        <p>
+          We track <strong id="lead-n-total">—</strong> pathogens against the
+          World Cup 2026 threat-assessment protocol. Each is screened through a
+          sequence of yes/no questions — endemicity, increased transmission at WC
+          venues, importation pressure, vector competence, healthcare-only spread
+          — before computing a per-case outbreak size and an excess-risk score.
+        </p>
+        <p>
+          Click any row to inspect the decision in full and <em>override</em>
+          any flag or parameter to see how the bucket changes. Edits persist
+          locally in your browser.
+        </p>
+      </div>
+      <aside class="lead-side">
+        <div class="lead-side-h">Snapshot</div>
+        <p>Data are a frozen snapshot of the curated Risk Filtering sheet, not a live read. Releases are tagged against the sheet date.</p>
+        <p style="margin-bottom:0;"><span id="lead-snapshot-date" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);"></span></p>
+      </aside>
+    </section>
+
+    <section class="overview-stats">
+      <div class="ostat ostat-accent">
+        <div class="ostat-label">Priority</div>
+        <div class="ostat-value" id="stat-priority">—</div>
+      </div>
+      <div class="ostat">
+        <div class="ostat-label">Excluded</div>
+        <div class="ostat-value" id="stat-excluded">—</div>
+      </div>
+      <div class="ostat">
+        <div class="ostat-label">Total tracked</div>
+        <div class="ostat-value" id="stat-total">—</div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="overview-section-h">All pathogens</h2>
+      <p class="overview-note">Sorted by status, then alphabetically. Click any row for full detail.</p>
+
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-chip is-active" data-filter="all">All <span class="filter-count" id="count-all"></span></button>
+        <button class="filter-chip" data-filter="priority">Priority <span class="filter-count" id="count-priority"></span></button>
+        <button class="filter-chip" data-filter="excluded">Excluded <span class="filter-count" id="count-excluded"></span></button>
+        <span class="filter-spacer"></span>
+        <button class="reset-all-btn" id="reset-all-btn" disabled>Reset all overrides</button>
+      </div>
+
+      <div class="overview-entries" id="entries"></div>
+    </section>
+
+  </section>
+
+  <!-- ============ PATHOGEN DETAIL VIEW ============ -->
+  <section id="view-pathogen" class="view">
+    <!-- innerHTML injected by renderPathogenDetail() -->
+  </section>
+
+  <!-- ============ ADD YOUR OWN VIEW ============ -->
+  <section id="view-custom" class="view">
+    <!-- innerHTML injected by renderCustomView() -->
+  </section>
+
+  <div class="footnote-block">
+    <p class="footnote">
+      Mockup &nbsp;·&nbsp; Data: Risk Filtering sheet snapshot <span id="footer-snapshot">—</span>
+      &nbsp;·&nbsp; Companion to the narrative walkthrough
+    </p>
+  </div>
+
+</div>
+
+<!-- About / methodology modal -->
+<div class="about-overlay" id="about-overlay" role="dialog" aria-modal="true">
+  <div class="about-modal">
+    <div class="about-header">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;">About this dashboard</div>
+        <h2 class="about-title">Pathogen Risk Screening — Methodology</h2>
+      </div>
+      <button class="about-close" id="about-close" aria-label="Close">×</button>
+    </div>
+    <div class="about-body">
+      <p>
+        This dashboard surfaces, in interactive form, the screening described in the
+        <strong>ACCIDDA / Insight Net Threat Assessment Protocol</strong> for the 2026
+        FIFA World Cup. Each tracked pathogen is screened against a sequence of
+        questions; for those that survive screening, a quantitative excess-risk
+        score combines importation pressure, per-case outbreak size, and per-case
+        impact.
+      </p>
+      <p>
+        Each pathogen lands in one of two buckets:
+      </p>
+      <p>
+        &nbsp;&nbsp;<strong style="color:var(--priority);">Priority</strong> — meets the
+        inclusion criteria and warrants close monitoring during the tournament.
+        <br>
+        &nbsp;&nbsp;<strong style="color:var(--ink-soft);">Excluded</strong> — fails an
+        explicit exclusion criterion (no acute sequelae, risk below threshold,
+        zero expected imports, imports not significant vs local prevalence, etc.).
+      </p>
+      <p>
+        Each pathogen page lets you <strong>override</strong> the screening
+        answers and parameter values, and <strong>re-run the simulation</strong>
+        to see how the per-case outbreak size and risk value respond. The global
+        <strong>Q threshold</strong> can be retuned from the masthead. Edits
+        live locally in your browser; they don't affect anyone else's view, and
+        they don't write back to the source sheet.
+      </p>
+      <p>
+        The <strong>Add Your Own</strong> tab lets you enter a pathogen that
+        isn't in the curated list and run it through the same screening +
+        simulation + risk-derivation tooling. User-added pathogens appear in
+        the overview alongside the curated ones, tagged accordingly, and can be
+        removed from their detail page.
+      </p>
+      <p>
+        Data shown are a <strong>frozen snapshot</strong> of the curated Risk Filtering
+        sheet, not a live read. Releases of this dashboard are tagged against the
+        sheet date so prior snapshots remain browsable.
+      </p>
+      <p>
+        Companion to the <a href="#" style="color:var(--accent);">narrative walkthrough</a>
+        and the <a href="https://epistorm.github.io/IDWC26-importation/" style="color:var(--accent);">importation-risk dashboard</a> from EPISTORM.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script id="pathogen-data" type="application/json">__PATHOGEN_DATA__</script>
+
+<script>
+(function () {
+  // ====================================================================
+  //  Data + state
+  // ====================================================================
+  const payload = JSON.parse(document.getElementById('pathogen-data').textContent);
+  const META    = payload.meta;
+  const RAW     = payload.pathogens;
+
+  // BASELINE is keyed by name and is the immutable source. OVERRIDES is
+  // a per-pathogen partial object stored in localStorage; effective(name)
+  // returns baseline merged with overrides. User-added pathogens (CUSTOM)
+  // are merged into BASELINE on load so they get the same plumbing
+  // (override + sim + screen) as curated rows; the source: 'user' field
+  // is how downstream code distinguishes them.
+  const BASELINE = new Map(RAW.map(p => [p.name, Object.freeze({...p, source: 'curated'})]));
+
+  const STORAGE_KEY = 'wc-risk-overrides-v1';
+  let OVERRIDES = (() => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+    catch { return {}; }
+  })();
+
+  const CUSTOM_KEY = 'wc-risk-custom-pathogens-v1';
+  let CUSTOM = (() => {
+    try { return JSON.parse(localStorage.getItem(CUSTOM_KEY) || '{}'); }
+    catch { return {}; }
+  })();
+  function persistCustom() {
+    localStorage.setItem(CUSTOM_KEY, JSON.stringify(CUSTOM));
+  }
+  function loadCustomIntoBaseline() {
+    for (const name in CUSTOM) {
+      BASELINE.set(name, Object.freeze({ ...CUSTOM[name], source: 'user' }));
+    }
+  }
+  loadCustomIntoBaseline();
+  function isCustom(name) {
+    const b = BASELINE.get(name);
+    return !!(b && b.source === 'user');
+  }
+  function addCustom(p) {
+    CUSTOM[p.name] = p;
+    BASELINE.set(p.name, Object.freeze({ ...p, source: 'user' }));
+    persistCustom();
+  }
+  function removeCustom(name) {
+    delete CUSTOM[name];
+    BASELINE.delete(name);
+    if (OVERRIDES[name]) { delete OVERRIDES[name]; persist(); }
+    delete SIM_RESULTS[name];
+    persistCustom();
+  }
+  // Build a blank pathogen record with the same schema as curated rows.
+  function blankPathogen(name, endemic) {
+    return {
+      name, endemic: !!endemic,
+      priority_label: null, inputer: null, reviewer: null,
+      can_establish: null, wc_elev_transmit: null, imports_gt_5pct: null,
+      dead_end_host: null, vector_absent: null, healthcare_only: null,
+      R0: null, WC_R0: null, k: null, g: null, S: null,
+      susceptibility: null, parameters_complete: false,
+      excess_importation: null, presence_at_wc: null,
+      wc_outbreak_size: null, wc_outbreak_size_sd: null,
+      nonwc_outbreak_size: null, nonwc_outbreak_size_sd: null,
+      excess_outbreak_cases: null, excess_outbreak_sd: null,
+      impact: null, risk_value: null,
+      total_cost_per_case: null, total_cost_per_infection: null,
+      dalys_per_case: null, symp_proportion: null, incidence_per_100k: null,
+      excl_endemic_no_wc_transmit: false, excl_endemic_no_acute: false,
+      excl_endemic_risk_below: false, incl_endemic_risk_above: false,
+      not_excluded_endemic: false,
+      excl_nonendemic_no_imports: false, excl_nonendemic_risk_below: false,
+      incl_nonendemic_can_establish: false, incl_nonendemic_risk_above: false,
+      not_excluded_nonendemic: false,
+      decision: 'unassessed'
+    };
+  }
+
+  function persist() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(OVERRIDES));
+  }
+  function isOverridden(name) {
+    const ov = OVERRIDES[name];
+    return ov && Object.keys(ov).length > 0;
+  }
+  function effective(name) {
+    const base = BASELINE.get(name);
+    const ov   = OVERRIDES[name] || {};
+    return Object.assign({}, base, ov);
+  }
+  function setOverride(name, field, value) {
+    const base = BASELINE.get(name);
+    if (!OVERRIDES[name]) OVERRIDES[name] = {};
+    // Compare to baseline; if they match, drop the override.
+    const sameAsBase = value === base[field] ||
+      (value == null && base[field] == null) ||
+      (Number.isNaN(value) && Number.isNaN(base[field]));
+    if (sameAsBase) {
+      delete OVERRIDES[name][field];
+      if (Object.keys(OVERRIDES[name]).length === 0) delete OVERRIDES[name];
+    } else {
+      OVERRIDES[name][field] = value;
+    }
+    persist();
+  }
+  function resetPathogen(name) {
+    delete OVERRIDES[name];
+    persist();
+  }
+  function resetAll() {
+    OVERRIDES = {};
+    persist();
+  }
+
+  // ====================================================================
+  //  Formatting helpers
+  // ====================================================================
+  function fmt(x) {
+    if (x === null || x === undefined || Number.isNaN(x)) return null;
+    if (x === 0) return "0";
+    const ax = Math.abs(x);
+    if (ax >= 1000) return Math.round(x).toLocaleString();
+    if (ax >= 100)  return x.toFixed(0);
+    if (ax >= 10)   return x.toFixed(1);
+    if (ax >= 1)    return x.toFixed(2);
+    if (ax >= 0.01) return x.toFixed(3);
+    return x.toPrecision(2);
+  }
+  function fmtMoney(x) {
+    if (x === null || x === undefined || Number.isNaN(x)) return '—';
+    return '$' + Math.round(x).toLocaleString();
+  }
+  function tristateLabel(v) {
+    if (v === 'yes') return 'Yes';
+    if (v === 'no')  return 'No';
+    return '—';
+  }
+  function decisionLabel(d) {
+    return ({ priority: "Priority",
+              under_eval: "Under evaluation",
+              excluded: "Excluded",
+              unassessed: "Pending review" })[d] || d;
+  }
+
+  // ====================================================================
+  //  Simulation — JS port of scripts/google_sheets_outbreak.R
+  //
+  //  simulate_branching() mirrors simple_branching() but with the
+  //  min(1, ...) → max(1, ...) bug fix, so the number of generations
+  //  honors the configured max_time. estimateExcess() composes the two
+  //  WC and non-WC distributions like estimate_excess() does in R.
+  // ====================================================================
+  function rnorm() {
+    // Box-Muller; one draw per call (the other half is discarded).
+    const u1 = Math.random() || 1e-12, u2 = Math.random();
+    return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  }
+  function rgamma(shape, scale) {
+    // Marsaglia–Tsang for shape >= 1; for shape < 1 use the standard
+    // boost (rgamma(shape+1) * U^(1/shape)).
+    if (shape < 1) {
+      const u = Math.random() || 1e-12;
+      return rgamma(shape + 1, scale) * Math.pow(u, 1 / shape);
+    }
+    const d = shape - 1/3;
+    const c = 1 / Math.sqrt(9 * d);
+    while (true) {
+      let x, v;
+      do { x = rnorm(); v = 1 + c * x; } while (v <= 0);
+      v = v * v * v;
+      const u = Math.random();
+      if (u < 1 - 0.0331 * x*x*x*x)                        return d * v * scale;
+      if (Math.log(u) < 0.5 * x*x + d - d*v + d*Math.log(v)) return d * v * scale;
+    }
+  }
+  function rpoisson(lambda) {
+    if (lambda <= 0) return 0;
+    // Knuth's algorithm; switch to normal approximation for large lambda
+    // where Knuth gets slow.
+    if (lambda < 30) {
+      const L = Math.exp(-lambda);
+      let k = 0, p = 1;
+      do { k++; p *= Math.random(); } while (p > L);
+      return k - 1;
+    }
+    const x = lambda + Math.sqrt(lambda) * rnorm();
+    return Math.max(0, Math.round(x));
+  }
+  function rnbinom(size, mu) {
+    // Gamma–Poisson mixture: X | g ~ Pois(g), g ~ Gamma(size, mu/size).
+    if (size <= 0 || mu <= 0) return 0;
+    const g = rgamma(size, mu / size);
+    return rpoisson(g);
+  }
+
+  // Returns { mean, sd } of the per-case outbreak size distribution.
+  function simulate_branching(n, mu, k, max_time, generation_time) {
+    if (mu == null || k == null || generation_time == null) return null;
+    if (mu <= 0 || k <= 0 || generation_time <= 0) return { mean: 1, sd: 0 };
+    // FIX: R code has `min(1, ...)` which always evaluates to 1.
+    // Use max() so the configured max_time actually controls depth.
+    const generations = Math.max(1, Math.round(max_time / generation_time));
+    let sum = 0, sumSq = 0;
+    for (let i = 0; i < n; i++) {
+      let current = 1, total = 1;
+      for (let j = 0; j < generations; j++) {
+        const off = rnbinom(k * current, mu * current);
+        current = off;
+        total += off;
+        if (current === 0) break;
+      }
+      sum   += total;
+      sumSq += total * total;
+    }
+    const mean = sum / n;
+    const variance = Math.max(0, sumSq / n - mean * mean);
+    return { mean, sd: Math.sqrt(variance) };
+  }
+
+  const SIM_DEFAULTS = { n: 1000, max_time: 17 };
+
+  // estimateExcess: mirrors estimate_excess() in R. Returns the four
+  // sheet columns plus a parameter signature used to detect staleness
+  // when inputs change.
+  function estimateExcess(p) {
+    const { R0, WC_R0, k, g, S } = p;
+    const inputs = [R0, k, g, S];
+    if (inputs.some(v => v == null || Number.isNaN(v))) return null;
+    const nonwc = simulate_branching(SIM_DEFAULTS.n, R0 * S, k, SIM_DEFAULTS.max_time, g);
+    let wc;
+    if (WC_R0 == null || Number.isNaN(WC_R0)) {
+      wc = nonwc; // R code: if WC_R0 is NA, assume WC_R0 = R0.
+    } else {
+      wc = simulate_branching(SIM_DEFAULTS.n, WC_R0 * S, k, SIM_DEFAULTS.max_time, g);
+    }
+    return {
+      wc_outbreak_mean:    wc.mean,    wc_outbreak_sd:    wc.sd,
+      nonwc_outbreak_mean: nonwc.mean, nonwc_outbreak_sd: nonwc.sd
+    };
+  }
+
+  // Combine sim outputs with imports/presence/cost into the headline
+  // excess-cases and risk-value numbers. SD propagated assuming the
+  // simulated WC and non-WC distributions are independent and imports/
+  // presence/cost are treated as point estimates.
+  function deriveRisk(p, sim) {
+    if (!sim) return null;
+    const imp     = p.excess_importation ?? 0;
+    const pres    = p.presence_at_wc     ?? 0;
+    const cost    = p.total_cost_per_case ?? 0;
+    const excess  = imp * sim.wc_outbreak_mean
+                  + pres * (sim.wc_outbreak_mean - sim.nonwc_outbreak_mean);
+    const var_ec  = imp * imp * sim.wc_outbreak_sd * sim.wc_outbreak_sd
+                  + pres * pres * (sim.wc_outbreak_sd * sim.wc_outbreak_sd
+                                 + sim.nonwc_outbreak_sd * sim.nonwc_outbreak_sd);
+    const excess_sd = Math.sqrt(Math.max(0, var_ec));
+    const risk    = excess * cost;
+    const risk_sd = excess_sd * cost;
+    return Object.assign({}, sim, {
+      excess_cases_mean: excess, excess_cases_sd: excess_sd,
+      risk_value_mean: risk,    risk_value_sd:   risk_sd
+    });
+  }
+
+  // Per-pathogen simulation cache. Keyed by name, value is { sig, wc/nonwc
+  // means + SDs, ts }. sig only includes inputs that actually affect the
+  // per-case outbreak simulation — editing imports / presence / cost
+  // doesn't invalidate the sim, only the downstream derivation.
+  const SIM_RESULTS = Object.create(null);
+  function simSignature(p) {
+    return [p.R0, p.WC_R0, p.k, p.g, p.S].join('|');
+  }
+  function getSim(name) {
+    const r = SIM_RESULTS[name];
+    if (!r) return null;
+    const p = effective(name);
+    return { ...r, stale: r.sig !== simSignature(p) };
+  }
+  function runSim(name) {
+    const p = effective(name);
+    const sim = estimateExcess(p);
+    if (!sim) return null;
+    SIM_RESULTS[name] = Object.assign({ sig: simSignature(p), ts: Date.now() }, sim);
+    return SIM_RESULTS[name];
+  }
+
+  // Derive (current) excess cases + risk value from per-case outbreak
+  // values plus imports / presence / cost. Per-case values can come from
+  // a fresh simulation (mean + SD) or, if no sim has been run, fall back
+  // to the sheet's stored baseline values (SD treated as 0 in that case).
+  function currentDerivation(name) {
+    const state = effective(name);
+    const sim   = getSim(name);
+    const useSim = sim && !sim.stale;
+
+    const wcM = useSim ? sim.wc_outbreak_mean    : state.wc_outbreak_size;
+    const wcS = useSim ? sim.wc_outbreak_sd      : 0;
+    const ncM = useSim ? sim.nonwc_outbreak_mean : state.nonwc_outbreak_size;
+    const ncS = useSim ? sim.nonwc_outbreak_sd   : 0;
+
+    if (wcM == null) return null;
+
+    const imp  = state.excess_importation ?? 0;
+    const pres = state.presence_at_wc     ?? 0;
+    const cost = state.total_cost_per_case ?? 0;
+
+    const impTerm   = imp * wcM;
+    const presTerm  = (ncM != null) ? pres * (wcM - ncM) : 0;
+    const excess    = impTerm + presTerm;
+    const excessVar = imp * imp * wcS * wcS
+                    + pres * pres * (wcS * wcS + ncS * ncS);
+    const excessSd  = Math.sqrt(Math.max(0, excessVar));
+    const risk      = excess * cost;
+    const riskSd    = excessSd * cost;
+
+    return {
+      source: useSim ? 'sim' : 'baseline',
+      wcM, wcS, ncM, ncS,
+      imp, pres, cost,
+      impTerm, presTerm,
+      excess_cases_mean: excess, excess_cases_sd: excessSd,
+      risk_value_mean: risk,     risk_value_sd:   riskSd
+    };
+  }
+
+  // ====================================================================
+  //  Global Q (risk threshold)
+  // ====================================================================
+  // Default Q comes from the sheet (cell U1:V1 of "Risk Filtering").
+  // Falls back to 25000 if the extractor couldn't include it.
+  const Q_DEFAULT = (META && Number.isFinite(META.threshold_q)) ? META.threshold_q : 25000;
+  const Q_KEY = 'wc-risk-threshold-q-v1';
+  let THRESHOLD_Q = (() => {
+    const raw = localStorage.getItem(Q_KEY);
+    const v = raw == null ? Q_DEFAULT : Number(raw);
+    return (Number.isFinite(v) && v > 0) ? v : Q_DEFAULT;
+  })();
+  function setQ(v) {
+    THRESHOLD_Q = v;
+    localStorage.setItem(Q_KEY, String(v));
+  }
+
+  // ====================================================================
+  //  screen(): port of the protocol screening tree
+  //
+  //  Returns { bucket, reason_key, trace } for the given pathogen state.
+  //  The trace walks the screening questions in order; the decisive step
+  //  is flagged so the renderer can highlight it. Skipped/irrelevant
+  //  steps are also marked so the user can see the protocol's branching.
+  //
+  //  Q is the risk threshold (the protocol's Q). For pathogens that reach
+  //  the threshold step, we compare the BASELINE risk_value to Q — live
+  //  recompute of WCR from R0/k/g/S overrides is wired up in a later round.
+  // ====================================================================
+  function screen(p, q) {
+    const trace = [];
+    const push = (label, value, opts={}) => {
+      trace.push(Object.assign({ label, value }, opts));
+    };
+    const decide = (bucket, reason) => {
+      if (trace.length) trace[trace.length - 1].decisive = true;
+      return { bucket, reason, trace };
+    };
+
+    push('Endemicity', p.endemic ? 'Endemic' : 'Non-endemic');
+
+    if (!p.endemic) {
+      // Non-endemic path
+      push('Q1 · Can establish local transmission?', tristateLabel(p.can_establish));
+      const imp = p.excess_importation;
+      if (p.can_establish === 'yes') {
+        if (imp != null && imp > 0) {
+          push('Excess imports > 0', (imp === 100 ? 'placeholder' : fmt(imp)) + ' (yes)');
+          return decide('priority', 'incl_nonendemic_can_establish');
+        }
+        if (imp === 0) {
+          push('Excess imports > 0', '0 (no)');
+          return decide('excluded', 'excl_nonendemic_no_imports');
+        }
+      } else if (imp === 0) {
+        push('Excess imports > 0', '0 (no)');
+        return decide('excluded', 'excl_nonendemic_no_imports');
+      }
+    } else {
+      // Endemic path
+      push('Q2 · Increased WC transmission?', tristateLabel(p.wc_elev_transmit));
+      if (p.wc_elev_transmit !== 'yes') {
+        push('Q3 · Imports significant vs prevalence (>5%)?', tristateLabel(p.imports_gt_5pct));
+        if (p.imports_gt_5pct === 'no') {
+          return decide('excluded', 'excl_endemic_no_wc_transmit');
+        }
+      } else {
+        push('Q3 · Imports significant vs prevalence (>5%)?', 'skipped', { muted: true });
+      }
+    }
+
+    // Outbreak risk + impact screen
+    push('Q4 · Humans dead-end hosts?',  tristateLabel(p.dead_end_host));
+    push('Q5 · Lack competent vector?',  tristateLabel(p.vector_absent));
+    push('Q6 · Healthcare-associated?',  tristateLabel(p.healthcare_only));
+
+    // Risk threshold
+    const wcr = p.risk_value;
+    const wcrLabel = wcr == null ? '—' : fmtMoney(wcr);
+    push(`Risk value vs threshold Q = ${fmtMoney(q)}`, wcrLabel);
+
+    if (wcr == null) {
+      return { bucket: 'under_eval', reason: 'pending_params', trace };
+    }
+    if (wcr >= q) {
+      return decide('priority',
+        p.endemic ? 'incl_endemic_risk_above' : 'incl_nonendemic_risk_above');
+    }
+    return decide('excluded',
+      p.endemic ? 'excl_endemic_risk_below' : 'excl_nonendemic_risk_below');
+  }
+
+  const REASONS = {
+    incl_endemic_risk_above:
+      'Endemic pathogen with elevated WC transmission and computed risk above threshold.',
+    incl_nonendemic_can_establish:
+      'Non-endemic pathogen with potential to establish local transmission and imports > 0.',
+    incl_nonendemic_risk_above:
+      'Non-endemic pathogen with no ability to establish local transmission, but per-case impact high enough to warrant inclusion.',
+    excl_endemic_no_acute:
+      'No acute sequelae of infection during the World Cup window.',
+    excl_endemic_no_wc_transmit:
+      'Endemic pathogen with no increased transmission risk at WC-related activities and importations <5% of local prevalence.',
+    excl_endemic_risk_below:
+      'Endemic pathogen with computed excess risk below the threshold of concern.',
+    excl_nonendemic_no_imports:
+      'Non-endemic pathogen with expected importations of zero.',
+    excl_nonendemic_risk_below:
+      'Non-endemic pathogen with computed excess risk below the threshold of concern.',
+    pending_params:
+      'Pending parameter review.'
+  };
+
+  // For an unedited pathogen, prefer the curator-set reason from baseline
+  // flags (richer than what screen() can produce — e.g. no_acute is a
+  // clinical judgment). For an edited pathogen, use screen()'s reason key.
+  function reasonFor(state, isOverride) {
+    if (isOverride) {
+      const result = screen(state, THRESHOLD_Q);
+      return REASONS[result.reason] || 'Pending review.';
+    }
+    // Baseline path — pick the first flag that's set.
+    if (state.incl_endemic_risk_above)       return REASONS.incl_endemic_risk_above;
+    if (state.incl_nonendemic_can_establish) return REASONS.incl_nonendemic_can_establish;
+    if (state.incl_nonendemic_risk_above)    return REASONS.incl_nonendemic_risk_above;
+    if (state.excl_endemic_no_acute)         return REASONS.excl_endemic_no_acute;
+    if (state.excl_endemic_no_wc_transmit)   return REASONS.excl_endemic_no_wc_transmit;
+    if (state.excl_endemic_risk_below)       return REASONS.excl_endemic_risk_below;
+    if (state.excl_nonendemic_no_imports)    return REASONS.excl_nonendemic_no_imports;
+    if (state.excl_nonendemic_risk_below)    return REASONS.excl_nonendemic_risk_below;
+    if (state.decision === 'excluded')
+      return 'Excluded by curator; specific screening flag not yet recorded in the source sheet.';
+    if (state.decision === 'priority')
+      return 'Marked priority by curator; specific inclusion flag not yet recorded in the source sheet.';
+    return 'Pending review.';
+  }
+
+  // Build the state actually fed to screen(): baseline + overrides, with
+  // freshly-derived risk_value / excess_outbreak_cases swapped in. The
+  // derivation pulls from a fresh sim if one exists, else from the
+  // baseline outbreak sizes.
+  function stateWithSim(name) {
+    const state = effective(name);
+    const d = currentDerivation(name);
+    if (d) {
+      state.wc_outbreak_size      = d.wcM;
+      state.nonwc_outbreak_size   = d.ncM;
+      state.excess_outbreak_cases = d.excess_cases_mean;
+      state.risk_value            = d.risk_value_mean;
+    }
+    return state;
+  }
+
+  function effectiveDecision(name) {
+    const base     = BASELINE.get(name);
+    const sim      = getSim(name);
+    const hasSim   = sim && !sim.stale;
+    // Custom pathogens have no curator baseline, so screen() always
+    // determines the bucket. Curated pathogens still defer to the
+    // baseline decision until edited or simulated.
+    const custom   = base.source === 'user';
+    const override = isOverridden(name) || hasSim || custom;
+    const state    = stateWithSim(name);
+
+    if (!override) {
+      return { bucket: base.decision, reason: reasonFor(state, false), state, override: false, sim: null };
+    }
+    const result = screen(state, THRESHOLD_Q);
+    return { bucket: result.bucket, reason: reasonFor(state, true), state, override: true, sim };
+  }
+
+  // ====================================================================
+  //  Overview view
+  // ====================================================================
+  const ORDER = { priority: 0, under_eval: 1, excluded: 2, unassessed: 3 };
+
+  function sortedEntries(filter) {
+    // Pull every pathogen — curated + user-added — and sort by EFFECTIVE
+    // bucket so overrides / sims / custom additions all surface correctly.
+    return Array.from(BASELINE.values()).sort((a, b) => {
+      const ea = effectiveDecision(a.name).bucket;
+      const eb = effectiveDecision(b.name).bucket;
+      const da = ORDER[ea] ?? 9, db = ORDER[eb] ?? 9;
+      if (da !== db) return da - db;
+      return a.name.localeCompare(b.name);
+    }).filter(p => {
+      if (filter === 'all') return true;
+      return effectiveDecision(p.name).bucket === filter;
+    });
+  }
+
+  function statTile(label, value) {
+    if (value === null || value === undefined) return '';
+    const muted = (value === '—');
+    return `<div class="ostat-mini">
+      <div class="ostat-mini-label">${label}</div>
+      <div class="ostat-mini-value${muted ? ' muted' : ''}">${value}</div>
+    </div>`;
+  }
+
+  function renderEntry(p) {
+    const eff = effectiveDecision(p.name);
+    const state = eff.state;
+
+    const endemicTag = state.endemic
+      ? '<span class="endemic-tag">Endemic</span>'
+      : '<span class="nonendemic-tag">Non-endemic</span>';
+    const customTag = isCustom(p.name)
+      ? ' <span class="custom-tag">Custom</span>' : '';
+    const overrideTag = (eff.override && !isCustom(p.name))
+      ? ' <span class="overridden-tag">Overridden</span>' : '';
+    const statusTag = decisionLabel(eff.bucket);
+
+    const isPlaceholder = v => v === null || v === undefined || v === 100;
+    const excessCasesIrrelevant =
+      state.incl_nonendemic_can_establish || state.excl_endemic_no_wc_transmit;
+
+    const importVal      = isPlaceholder(state.excess_importation) ? '—' : fmt(state.excess_importation);
+    const excessCasesVal = (isPlaceholder(state.excess_outbreak_cases) || excessCasesIrrelevant)
+                             ? '—' : fmt(state.excess_outbreak_cases);
+
+    const slug = encodeURIComponent(p.name);
+    return `
+      <a class="oentry" data-decision="${eff.bucket}" href="#/pathogen/${slug}">
+        <div class="ogroup-dot ${eff.bucket}"></div>
+        <div class="oentry-body">
+          <div class="oentry-eyebrow">${endemicTag} &nbsp;·&nbsp; ${statusTag}${customTag}${overrideTag}</div>
+          <div class="oentry-h">${escapeHtml(p.name)}</div>
+          <div class="oentry-desc">${eff.reason}</div>
+        </div>
+        <div class="oentry-stats">
+          ${statTile('Excess imports', importVal)}
+          ${statTile('Excess cases', excessCasesVal)}
+        </div>
+        <div class="oentry-arrow">→</div>
+      </a>
+    `;
+  }
+
+  let currentFilter = 'all';
+
+  function renderOverview() {
+    // Effective counts across both curated and user-added pathogens.
+    const counts = { all: 0, priority: 0, excluded: 0, under_eval: 0, unassessed: 0 };
+    for (const p of BASELINE.values()) {
+      const b = effectiveDecision(p.name).bucket;
+      counts.all++;
+      counts[b] = (counts[b] || 0) + 1;
+    }
+    document.getElementById('stat-priority').textContent = counts.priority;
+    document.getElementById('stat-excluded').textContent = counts.excluded;
+    document.getElementById('stat-total').textContent    = counts.all;
+    document.getElementById('lead-n-total').textContent  = counts.all;
+
+    Object.entries(counts).forEach(([k, v]) => {
+      const el = document.getElementById('count-' + k);
+      if (el) el.textContent = v;
+    });
+
+    document.getElementById('entries').innerHTML =
+      sortedEntries(currentFilter).map(renderEntry).join('');
+
+    // Reset-all button: enabled only when any overrides exist.
+    document.getElementById('reset-all-btn').disabled =
+      Object.keys(OVERRIDES).length === 0;
+  }
+
+  // ====================================================================
+  //  Pathogen detail view
+  // ====================================================================
+  // Render the risk-value derivation: shows the formula with current
+  // values plugged in, line by line, with cost-per-case editable inline.
+  // Uses simulated per-case outbreak sizes when a fresh sim exists,
+  // otherwise falls back to the baseline values from the sheet.
+  function renderDerivation(name) {
+    const base = BASELINE.get(name);
+    const d    = currentDerivation(name);
+    const isMoney = v => fmtMoney(v);
+    const srcTag = d
+      ? `<span class="src-tag ${d.source === 'sim' ? 'is-sim' : ''}">
+            using ${d.source === 'sim' ? 'fresh simulation' : 'sheet baseline'} outbreak sizes
+         </span>`
+      : '';
+
+    if (!d) {
+      return `
+        <div class="derivation">
+          <div class="derivation-h">Risk derivation</div>
+          <div class="d-empty">Need per-case outbreak size (run a simulation, or have a baseline value) to derive risk.</div>
+        </div>
+      `;
+    }
+
+    const fmtPlain = v => (v == null ? '—' : fmt(v));
+    const hasPresence = d.pres > 0 && d.ncM != null;
+    const costDirty   = (d.cost !== base.total_cost_per_case);
+
+    // Excess-cases equation
+    const formExc = hasPresence
+      ? 'imports × WC outbreak + presence × (WC − non-WC)'
+      : 'imports × WC outbreak';
+    const substExc = hasPresence
+      ? `${fmtPlain(d.imp)} × ${fmtPlain(d.wcM)} + ${fmtPlain(d.pres)} × (${fmtPlain(d.wcM)} − ${fmtPlain(d.ncM)})`
+      : `${fmtPlain(d.imp)} × ${fmtPlain(d.wcM)}`;
+    const sumExc = hasPresence
+      ? `${fmtPlain(d.impTerm)} + ${fmtPlain(d.presTerm)}`
+      : `${fmtPlain(d.impTerm)}`;
+    const sdExc = d.excess_cases_sd > 0
+      ? `<span class="d-sd">± ${fmtPlain(d.excess_cases_sd)}</span>` : '';
+
+    // Risk-value equation
+    const sdRisk = d.risk_value_sd > 0
+      ? `<span class="d-sd">± ${isMoney(d.risk_value_sd)}</span>` : '';
+
+    return `
+      <div class="derivation">
+        <div class="derivation-h">
+          Risk derivation ${srcTag}
+        </div>
+
+        <div class="d-eq">
+          <span class="d-label">Excess cases</span>
+          <div class="d-math">
+            <div class="d-line d-line-form">${formExc}</div>
+            <div class="d-line">= ${substExc}</div>
+            ${hasPresence ? `<div class="d-line">= ${sumExc}</div>` : ''}
+            <div class="d-line d-result">= ${fmtPlain(d.excess_cases_mean)} ${sdExc}</div>
+          </div>
+        </div>
+
+        <div class="d-eq">
+          <span class="d-label">Risk value</span>
+          <div class="d-math">
+            <div class="d-line d-line-form">excess cases × cost per case</div>
+            <div class="d-line">
+              = ${fmtPlain(d.excess_cases_mean)} &nbsp;×&nbsp;
+              <input type="number" step="any" inputmode="decimal"
+                class="d-cost-input${costDirty ? ' is-dirty' : ''}"
+                data-edit="total_cost_per_case"
+                value="${d.cost ?? ''}"
+                placeholder="${base.total_cost_per_case ?? '—'}">
+              &nbsp;USD
+            </div>
+            <div class="d-line d-result">= ${isMoney(d.risk_value_mean)} ${sdRisk}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function computedCell(label, mean, sd, baseline, fresh, money) {
+    const f = money ? fmtMoney : fmt;
+    const isMissing = mean == null || Number.isNaN(mean);
+    const valHtml = isMissing
+      ? '<span style="color:var(--ink-faint);font-weight:400;">—</span>'
+      : `${f(mean) ?? '—'}${sd != null && sd > 0 ? `<span class="computed-sd">± ${f(sd) ?? '—'}</span>` : ''}`;
+    const baselineHtml = baseline == null
+      ? '<span style="opacity:0.5;">baseline —</span>'
+      : `baseline ${f(baseline) ?? '—'}`;
+    return `<div class="computed-cell${fresh ? ' is-fresh' : ''}">
+      <div class="computed-label">${label}</div>
+      <div class="computed-value">${valHtml}</div>
+      <div class="computed-baseline">${baselineHtml}</div>
+    </div>`;
+  }
+
+  function renderTraceStep(t, idx) {
+    const cls = (t.decisive ? ' is-decisive' : '') + (t.muted ? ' is-muted' : '');
+    return `<div class="trace-step${cls}">
+      <span class="trace-num">${String(idx + 1).padStart(2, '0')}</span>
+      <span class="trace-label">${escapeHtml(t.label)}</span>
+      <span class="trace-value">${escapeHtml(t.value)}</span>
+    </div>`;
+  }
+
+  function tristateEditor(field, currentValue, baselineValue) {
+    const opts = [['yes','Yes'], ['no','No'], ['', '—']];
+    const dirty = currentValue !== baselineValue
+                  && !(currentValue == null && baselineValue == null);
+    return `
+      <div class="tristate" data-edit="${field}">
+        ${opts.map(([v, lbl]) => {
+          const isSel = ((currentValue ?? '') === v);
+          return `<button type="button" class="tristate-opt${isSel ? ' is-selected' : ''}" data-value="${v}">${lbl}</button>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  function numEditor(field, label, current, baseline) {
+    const dirty = (current !== baseline) && !(current == null && baseline == null);
+    const val = (current == null || Number.isNaN(current)) ? '' : current;
+    return `
+      <div class="num-cell">
+        <span class="num-label">${label}</span>
+        <input type="number" step="any" inputmode="decimal"
+          class="num-input${dirty ? ' is-dirty' : ''}"
+          data-edit="${field}" value="${val}"
+          placeholder="${baseline == null ? '—' : baseline}">
+      </div>
+    `;
+  }
+
+  function flagGroup(qnum, label, field, state, base) {
+    const dirty = (state[field] !== base[field]);
+    return `
+      <div class="edit-group">
+        <div class="edit-label">
+          <span class="qnum">${qnum}</span> ${label}
+          ${dirty ? '<span class="dirty-mark">edited</span>' : ''}
+        </div>
+        ${tristateEditor(field, state[field], base[field])}
+      </div>
+    `;
+  }
+
+  function renderPathogenDetail(name) {
+    const base  = BASELINE.get(name);
+    if (!base) {
+      document.getElementById('view-pathogen').innerHTML =
+        `<button class="detail-back" onclick="history.back()">← Back</button>
+         <p>Unknown pathogen: ${escapeHtml(name)}</p>`;
+      return;
+    }
+    const eff   = effectiveDecision(name);
+    const state = eff.state;
+    const baseDecision = base.decision;
+    const traceResult  = screen(state, THRESHOLD_Q);
+    const wasChanged   = eff.override && eff.bucket !== baseDecision;
+    const sim          = getSim(name);
+    const hasSim       = !!sim;
+
+    const endemicEditor = `
+      <div class="edit-group">
+        <div class="edit-label">
+          <span class="qnum">type</span> Endemicity
+          ${state.endemic !== base.endemic ? '<span class="dirty-mark">edited</span>' : ''}
+        </div>
+        <div class="tristate" data-edit="endemic">
+          <button type="button" class="tristate-opt${state.endemic ? ' is-selected' : ''}" data-value="true">Endemic</button>
+          <button type="button" class="tristate-opt${!state.endemic ? ' is-selected' : ''}" data-value="false">Non-endemic</button>
+        </div>
+      </div>
+    `;
+
+    const html = `
+      <button class="detail-back" id="detail-back">&larr; Back to all pathogens</button>
+
+      <header class="detail-header">
+        <div class="detail-eyebrow">
+          <span class="detail-dot ${eff.bucket}"></span>
+          <span>${state.endemic ? 'Endemic' : 'Non-endemic'}</span>
+          <span>·</span>
+          <span>${decisionLabel(eff.bucket)}${eff.override ? ' · overridden' : ''}</span>
+        </div>
+        <h1 class="detail-title">${escapeHtml(name)}</h1>
+        <p class="detail-status">
+          ${eff.override
+            ? `<strong>${decisionLabel(eff.bucket)}</strong> under your inputs.`
+              + (wasChanged ? `<span class="was">Baseline was ${decisionLabel(baseDecision)}</span>` : '')
+            : `<strong>${decisionLabel(eff.bucket)}</strong> per the curated baseline.`}
+        </p>
+      </header>
+
+      <div class="detail-reason">${eff.reason}</div>
+
+      <div class="detail-cols">
+        <!-- LEFT: decision trace -->
+        <div>
+          <div class="detail-col-h">Decision trace</div>
+          ${traceResult.trace.map(renderTraceStep).join('')}
+        </div>
+
+        <!-- RIGHT: editable inputs -->
+        <div>
+          <div class="detail-col-h">Screening answers</div>
+
+          ${endemicEditor}
+
+          ${!state.endemic ? flagGroup('Q1', 'Can establish local transmission?', 'can_establish',     state, base) : ''}
+          ${ state.endemic ? flagGroup('Q2', 'Increased WC transmission?',       'wc_elev_transmit',    state, base) : ''}
+          ${ state.endemic ? flagGroup('Q3', 'Imports significant vs prevalence (>5%)?', 'imports_gt_5pct', state, base) : ''}
+          ${flagGroup('Q4', 'Humans dead-end hosts?',         'dead_end_host',   state, base)}
+          ${flagGroup('Q5', 'Lack competent vector?',         'vector_absent',   state, base)}
+          ${flagGroup('Q6', 'Healthcare-associated only?',    'healthcare_only', state, base)}
+
+          <div class="edit-section" style="margin-top:28px;">
+            <div class="edit-section-h">Inputs</div>
+            <div class="num-grid">
+              ${numEditor('excess_importation', 'Excess imports', state.excess_importation, base.excess_importation)}
+              ${state.endemic
+                  ? numEditor('presence_at_wc', 'Presence', state.presence_at_wc, base.presence_at_wc)
+                  : ''}
+            </div>
+          </div>
+
+          <div class="edit-section" style="margin-top:24px;">
+            <div class="edit-section-h">Parameters</div>
+            <div class="num-grid">
+              ${numEditor('R0',    'R₀',     state.R0,     base.R0)}
+              ${numEditor('WC_R0', 'WC R₀',  state.WC_R0,  base.WC_R0)}
+              ${numEditor('k',     'k',      state.k,      base.k)}
+              ${numEditor('g',     'g',      state.g,      base.g)}
+              ${numEditor('S',     'S',      state.S,      base.S)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Computed values + Run simulation -->
+      <div class="computed-section">
+        <div class="computed-h">
+          Computed values
+          ${hasSim && sim.stale ? '<span class="stale-tag">stale</span>' : ''}
+        </div>
+        <div class="computed-grid">
+          ${(() => {
+            // Per-case outbreak sizes come from the sim if fresh, otherwise
+            // the baseline values from the sheet. Excess cases + risk value
+            // come from the live derivation so cost edits flow through.
+            const d = currentDerivation(name);
+            const fresh = hasSim && !sim.stale;
+            return [
+              computedCell('WC per-case outbreak size',
+                d ? d.wcM : null,
+                fresh ? sim.wc_outbreak_sd : null,
+                base.wc_outbreak_size, fresh),
+              computedCell('Non-WC per-case outbreak size',
+                d ? d.ncM : null,
+                fresh ? sim.nonwc_outbreak_sd : null,
+                base.nonwc_outbreak_size, fresh),
+              computedCell('Expected excess cases',
+                d ? d.excess_cases_mean : null,
+                d ? d.excess_cases_sd   : null,
+                base.excess_outbreak_cases, fresh),
+              computedCell('Risk value (USD)',
+                d ? d.risk_value_mean : null,
+                d ? d.risk_value_sd   : null,
+                base.risk_value, fresh, /*money=*/true)
+            ].join('');
+          })()}
+        </div>
+
+        ${renderDerivation(name)}
+
+        <div class="run-actions">
+          <button class="btn btn-run" id="run-sim">${hasSim ? 'Re-run simulation' : 'Run simulation'}</button>
+          <span class="run-meta">
+            ${hasSim
+              ? `Last run: ${new Date(sim.ts).toLocaleTimeString()} · n=${SIM_DEFAULTS.n} iterations, max_time=${SIM_DEFAULTS.max_time}d`
+              : `Click to simulate ${SIM_DEFAULTS.n} branching-process iterations with current inputs.`}
+          </span>
+        </div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn btn-warn" id="detail-reset" ${isOverridden(name) ? '' : 'disabled'}>Reset overrides</button>
+        ${isCustom(name)
+          ? '<button class="btn btn-warn" id="detail-remove">Remove pathogen</button>'
+          : ''}
+        <button class="btn" id="detail-back-2" style="margin-left:auto;">← Back</button>
+      </div>
+
+      <div class="detail-provenance">
+        <div>
+          <strong>Baseline excess imports:</strong> ${fmt(base.excess_importation) ?? '—'} &nbsp;·&nbsp;
+          <strong>Baseline excess cases:</strong> ${fmt(base.excess_outbreak_cases) ?? '—'} &nbsp;·&nbsp;
+          <strong>Baseline risk value:</strong> ${fmtMoney(base.risk_value)}
+        </div>
+        <div style="margin-top:6px;">
+          <strong>Inputer:</strong> ${escapeHtml(base.inputer || '—')} &nbsp;·&nbsp;
+          <strong>Reviewer:</strong> ${escapeHtml(base.reviewer || '—')}
+        </div>
+      </div>
+    `;
+
+    const host = document.getElementById('view-pathogen');
+    host.innerHTML = html;
+
+    // ----- wire up handlers -----
+    host.querySelectorAll('.tristate').forEach(group => {
+      const field = group.dataset.edit;
+      group.querySelectorAll('.tristate-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const raw = btn.dataset.value;
+          let value;
+          if (field === 'endemic') value = (raw === 'true');
+          else value = (raw === '' ? null : raw);
+          setOverride(name, field, value);
+          renderPathogenDetail(name);   // re-derive + re-render
+        });
+      });
+    });
+    host.querySelectorAll('input.num-input, input.d-cost-input').forEach(inp => {
+      inp.addEventListener('change', () => {
+        const field = inp.dataset.edit;
+        const raw = inp.value.trim();
+        const value = raw === '' ? null : Number(raw);
+        if (raw !== '' && Number.isNaN(value)) return;
+        setOverride(name, field, value);
+        renderPathogenDetail(name);
+      });
+    });
+    document.getElementById('detail-back').addEventListener('click', () => { location.hash = '#/'; });
+    document.getElementById('detail-back-2').addEventListener('click', () => { location.hash = '#/'; });
+    const resetBtn = document.getElementById('detail-reset');
+    if (resetBtn) resetBtn.addEventListener('click', () => {
+      if (confirm(`Reset all overrides for ${name}?`)) {
+        resetPathogen(name);
+        delete SIM_RESULTS[name];
+        renderPathogenDetail(name);
+      }
+    });
+    const removeBtn = document.getElementById('detail-remove');
+    if (removeBtn) removeBtn.addEventListener('click', () => {
+      if (confirm(`Remove "${name}" entirely? This deletes the pathogen and all its overrides — cannot be undone.`)) {
+        removeCustom(name);
+        location.hash = '#/custom';
+      }
+    });
+    const runBtn = document.getElementById('run-sim');
+    if (runBtn) runBtn.addEventListener('click', () => {
+      runBtn.disabled = true;
+      runBtn.textContent = 'Running…';
+      // Defer to next frame so the button paints before the (synchronous)
+      // simulation blocks the thread for a few ms.
+      requestAnimationFrame(() => {
+        const r = runSim(name);
+        if (!r) alert('Simulation needs R₀, k, g, and S filled in.');
+        renderPathogenDetail(name);
+      });
+    });
+  }
+
+  // ====================================================================
+  //  Add Your Own view
+  // ====================================================================
+  function renderCustomView() {
+    const host = document.getElementById('view-custom');
+    const customs = Object.values(CUSTOM);
+
+    // Tristate row helper (form-local; the detail-view version reads from
+    // state, this one builds from raw form values).
+    const triRow = (qnum, label, field, defaultVal) => `
+      <div class="form-row">
+        <span class="form-label"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--ink-faint);letter-spacing:0.08em;background:var(--paper-tint);padding:1px 5px;margin-right:6px;">${qnum}</span>${label}</span>
+        <div class="tristate" data-form="${field}">
+          <button type="button" class="tristate-opt${defaultVal === 'yes' ? ' is-selected' : ''}" data-value="yes">Yes</button>
+          <button type="button" class="tristate-opt${defaultVal === 'no'  ? ' is-selected' : ''}" data-value="no">No</button>
+          <button type="button" class="tristate-opt${(!defaultVal || defaultVal === '') ? ' is-selected' : ''}" data-value="">—</button>
+        </div>
+      </div>
+    `;
+    const numRow = (field, label) => `
+      <div class="form-row">
+        <span class="form-label">${label}</span>
+        <input type="number" step="any" inputmode="decimal"
+               class="form-input" data-form="${field}" placeholder="—">
+      </div>
+    `;
+
+    host.innerHTML = `
+      <p class="custom-intro">
+        Add a pathogen that's <strong>not</strong> in the curated list — to
+        explore how it would fall through the screening protocol with your
+        own inputs. The new entry lives only in your browser (not the
+        source sheet), and is treated like any curated row from there: it
+        appears in the overview, gets the same screening + simulation +
+        override tooling, and can be removed at any time.
+      </p>
+
+      <form class="custom-form" id="custom-form">
+        <div class="custom-form-h">New pathogen</div>
+
+        <div class="form-row">
+          <span class="form-label">Name<span class="req">*</span></span>
+          <input type="text" class="form-input" data-form="name" required
+                 maxlength="80" placeholder="e.g. Phlebovirus X" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <span class="form-label">Endemicity<span class="req">*</span></span>
+          <div class="tristate" data-form="endemic">
+            <button type="button" class="tristate-opt" data-value="true">Endemic</button>
+            <button type="button" class="tristate-opt is-selected" data-value="false">Non-endemic</button>
+          </div>
+        </div>
+
+        <div class="custom-form-section-h">Screening answers</div>
+        ${triRow('Q1', 'Can establish local transmission?',           'can_establish',    '')}
+        ${triRow('Q2', 'Increased WC transmission?',                  'wc_elev_transmit', '')}
+        ${triRow('Q3', 'Imports significant vs prevalence (>5%)?',    'imports_gt_5pct',  '')}
+        ${triRow('Q4', 'Humans dead-end hosts?',                      'dead_end_host',    '')}
+        ${triRow('Q5', 'Lack competent vector?',                      'vector_absent',    '')}
+        ${triRow('Q6', 'Healthcare-associated only?',                 'healthcare_only',  '')}
+
+        <div class="custom-form-section-h">Inputs</div>
+        ${numRow('excess_importation', 'Excess imports')}
+        ${numRow('presence_at_wc',     'Presence at WC')}
+        ${numRow('total_cost_per_case','Cost per case (USD)')}
+
+        <div class="custom-form-section-h">Parameters (optional)</div>
+        ${numRow('R0',    'R₀')}
+        ${numRow('WC_R0', 'WC R₀')}
+        ${numRow('k',     'k (overdispersion)')}
+        ${numRow('g',     'g (generation time, days)')}
+        ${numRow('S',     'S (susceptibility, 0–1)')}
+
+        <div class="custom-form-actions">
+          <button type="submit" class="btn">Add pathogen</button>
+          <button type="reset"  class="btn" id="custom-form-reset">Clear form</button>
+          <span class="form-error" id="custom-form-error"></span>
+        </div>
+      </form>
+
+      <div>
+        <div class="custom-list-h">Your pathogens (${customs.length})</div>
+        ${customs.length === 0
+          ? `<div class="custom-list-empty">None yet — add one above to get started.</div>`
+          : `<div class="overview-entries">${customs.map(c => renderEntry(c)).join('')}</div>`}
+      </div>
+    `;
+
+    // Tristate buttons inside this view: select-and-toggle behavior
+    host.querySelectorAll('.tristate').forEach(group => {
+      group.querySelectorAll('.tristate-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          group.querySelectorAll('.tristate-opt').forEach(b => b.classList.remove('is-selected'));
+          btn.classList.add('is-selected');
+        });
+      });
+    });
+
+    // Submit handler
+    const form = document.getElementById('custom-form');
+    const errEl = document.getElementById('custom-form-error');
+    form.addEventListener('submit', ev => {
+      ev.preventDefault();
+      errEl.textContent = '';
+      // Collect text + numeric fields
+      const fields = {};
+      form.querySelectorAll('[data-form]').forEach(el => {
+        if (el.classList && el.classList.contains('tristate')) {
+          const sel = el.querySelector('.tristate-opt.is-selected');
+          fields[el.dataset.form] = sel ? sel.dataset.value : '';
+        } else {
+          fields[el.dataset.form] = el.value;
+        }
+      });
+      const name = (fields.name || '').trim();
+      if (!name) { errEl.textContent = 'Name is required.'; return; }
+      if (BASELINE.has(name)) {
+        errEl.textContent = 'A pathogen with that name already exists.';
+        return;
+      }
+      const endemic = fields.endemic === 'true';
+      const p = blankPathogen(name, endemic);
+      // Flags
+      ['can_establish','wc_elev_transmit','imports_gt_5pct',
+       'dead_end_host','vector_absent','healthcare_only'].forEach(k => {
+        p[k] = (fields[k] === 'yes' || fields[k] === 'no') ? fields[k] : null;
+      });
+      // Numerics
+      ['R0','WC_R0','k','g','S',
+       'excess_importation','presence_at_wc','total_cost_per_case'].forEach(k => {
+        const v = (fields[k] || '').trim();
+        p[k] = v === '' ? null : Number(v);
+        if (v !== '' && Number.isNaN(p[k])) p[k] = null;
+      });
+
+      addCustom(p);
+      // Land on the new pathogen's detail page so user can refine + sim.
+      location.hash = '#/pathogen/' + encodeURIComponent(name);
+    });
+
+    // Wire clicks on the user-pathogen list (renderEntry's <a> handles
+    // navigation via href; nothing extra needed here).
+  }
+
+  // ====================================================================
+  //  Router
+  // ====================================================================
+  function showView(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('is-active'));
+    document.getElementById(id).classList.add('is-active');
+    window.scrollTo(0, 0);
+  }
+  function setActiveNav(id) {
+    document.querySelectorAll('.topnav a.topnav-link').forEach(el => el.classList.remove('is-active'));
+    if (id) document.getElementById(id).classList.add('is-active');
+  }
+  function route() {
+    const hash = location.hash || '#/';
+    const m = hash.match(/^#\/pathogen\/(.+)$/);
+    if (m) {
+      const name = decodeURIComponent(m[1]);
+      setActiveNav(null);
+      showView('view-pathogen');
+      renderPathogenDetail(name);
+    } else if (hash.startsWith('#/custom')) {
+      setActiveNav('nav-custom');
+      renderCustomView();
+      showView('view-custom');
+    } else {
+      setActiveNav('nav-overview');
+      renderOverview();
+      showView('view-overview');
+    }
+  }
+  window.addEventListener('hashchange', route);
+
+  // ====================================================================
+  //  Wire-up
+  // ====================================================================
+  document.getElementById('lead-snapshot-date').textContent = META.snapshot_at;
+  document.getElementById('footer-snapshot').textContent    = META.snapshot_at;
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('is-active'));
+      chip.classList.add('is-active');
+      currentFilter = chip.dataset.filter;
+      renderOverview();
+    });
+  });
+
+  document.getElementById('reset-all-btn').addEventListener('click', () => {
+    if (confirm('Reset all overrides? This cannot be undone.')) {
+      resetAll();
+      Object.keys(SIM_RESULTS).forEach(k => delete SIM_RESULTS[k]);
+      renderOverview();
+    }
+  });
+
+  // Q (risk threshold) slider — global; affects screen() bucketing
+  // for any pathogen that has overrides or a fresh sim result.
+  const qInput   = document.getElementById('threshold-q');
+  const qReset   = document.getElementById('threshold-q-reset');
+  document.getElementById('threshold-q-default').textContent = fmtMoney(Q_DEFAULT);
+  function syncQInput() {
+    qInput.value = THRESHOLD_Q;
+    qInput.classList.toggle('is-dirty', THRESHOLD_Q !== Q_DEFAULT);
+  }
+  qInput.addEventListener('change', () => {
+    const v = Number(qInput.value);
+    if (!Number.isFinite(v) || v <= 0) { syncQInput(); return; }
+    setQ(v);
+    syncQInput();
+    // Re-render whichever view is active.
+    if (location.hash.startsWith('#/pathogen/')) {
+      const name = decodeURIComponent(location.hash.slice('#/pathogen/'.length));
+      renderPathogenDetail(name);
+    } else {
+      renderOverview();
+    }
+  });
+  qReset.addEventListener('click', () => {
+    setQ(Q_DEFAULT);
+    syncQInput();
+    if (location.hash.startsWith('#/pathogen/')) {
+      const name = decodeURIComponent(location.hash.slice('#/pathogen/'.length));
+      renderPathogenDetail(name);
+    } else {
+      renderOverview();
+    }
+  });
+  syncQInput();
+
+  // About modal
+  const overlay = document.getElementById('about-overlay');
+  document.getElementById('about-open').addEventListener('click', () => overlay.classList.add('active'));
+  document.getElementById('about-close').addEventListener('click', () => overlay.classList.remove('active'));
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('active'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.classList.remove('active'); });
+
+  // Escape HTML entities in any user-visible string (pathogen names, etc).
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  route();
+})();
+</script>
+
+</body>
+</html>

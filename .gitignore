@@ -1,0 +1,11 @@
+# Built artifact (regenerate via scripts/build.sh).
+index.html
+
+# OS / editor cruft
+.DS_Store
+*.swp
+.Rhistory
+.RData
+
+# Dropbox metadata sidecar files
+*:com.dropbox.attrs
