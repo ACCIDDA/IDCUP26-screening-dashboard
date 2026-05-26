@@ -1376,21 +1376,31 @@
   }
 
   function effectiveDecision(name) {
-    const base     = BASELINE.get(name);
-    const sim      = getSim(name);
-    const hasSim   = sim && !sim.stale;
+    const base       = BASELINE.get(name);
+    const sim        = getSim(name);
+    const hasSim     = sim && !sim.stale;
     // Custom pathogens have no curator baseline, so screen() always
     // determines the bucket. Curated pathogens still defer to the
     // baseline decision until edited or simulated.
-    const custom   = base.source === 'user';
-    const override = isOverridden(name) || hasSim || custom;
-    const state    = stateWithSim(name);
+    const custom     = base.source === 'user';
+    const overridden = isOverridden(name) || hasSim || custom;
+    const state      = stateWithSim(name);
 
-    if (!override) {
+    // A pathogen's bucket depends on Q only if its baseline screening
+    // reached the risk-threshold step. Q-independent exclusions
+    // (no_acute, no_wc_transmit, no_imports, can_establish) must stick
+    // when the user moves the global Q, or the list re-shuffles wrongly.
+    const qDependent = state.excl_endemic_risk_below
+                    || state.incl_endemic_risk_above
+                    || state.excl_nonendemic_risk_below
+                    || state.incl_nonendemic_risk_above;
+    const qChanged   = THRESHOLD_Q !== Q_DEFAULT;
+
+    if (!overridden && !(qChanged && qDependent)) {
       return { bucket: base.decision, reason: reasonFor(state, false), state, override: false, sim: null };
     }
     const result = screen(state, THRESHOLD_Q);
-    return { bucket: result.bucket, reason: reasonFor(state, true), state, override: true, sim };
+    return { bucket: result.bucket, reason: reasonFor(state, true), state, override: overridden, sim };
   }
 
   // ====================================================================
