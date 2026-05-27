@@ -149,6 +149,10 @@
     letter-spacing: -0.02em;
   }
   .ostat-accent .ostat-value { color: var(--accent); }
+  .ostat-sub {
+    font-family: 'IBM Plex Mono', monospace; font-size: 21px;
+    color: var(--ink-faint); margin-top: 10px; letter-spacing: 0.02em;
+  }
 
   /* === Overview entries === */
   .overview-section-h {
@@ -785,22 +789,21 @@
       </aside>
     </section>
 
-    <section class="overview-stats">
+    <section class="overview-stats" id="overview-stats">
       <div class="ostat ostat-accent">
         <div class="ostat-label">Priority</div>
         <div class="ostat-value" id="stat-priority">—</div>
+        <div class="ostat-sub" id="stat-priority-custom" style="display:none;">+<span></span> custom</div>
       </div>
       <div class="ostat">
         <div class="ostat-label">Excluded</div>
         <div class="ostat-value" id="stat-excluded">—</div>
-      </div>
-      <div class="ostat" id="stat-custom-wrap" style="display:none;">
-        <div class="ostat-label">Custom</div>
-        <div class="ostat-value" id="stat-custom">—</div>
+        <div class="ostat-sub" id="stat-excluded-custom" style="display:none;">+<span></span> custom</div>
       </div>
       <div class="ostat">
         <div class="ostat-label">Total tracked</div>
         <div class="ostat-value" id="stat-total">—</div>
+        <div class="ostat-sub" id="stat-total-custom" style="display:none;">+<span></span> custom</div>
       </div>
     </section>
 
@@ -951,6 +954,7 @@
     BASELINE.delete(name);
     if (OVERRIDES[name]) { delete OVERRIDES[name]; persist(); }
     delete SIM_RESULTS[name];
+    persistSims();
     persistCustom();
   }
   // Build a blank pathogen record with the same schema as curated rows.
@@ -1169,7 +1173,14 @@
   // means + SDs, ts }. sig only includes inputs that actually affect the
   // per-case outbreak simulation — editing imports / presence / cost
   // doesn't invalidate the sim, only the downstream derivation.
-  const SIM_RESULTS = Object.create(null);
+  const SIM_KEY = 'wc-risk-sims-v1';
+  const SIM_RESULTS = (() => {
+    try { return JSON.parse(localStorage.getItem(SIM_KEY) || '{}'); }
+    catch { return {}; }
+  })();
+  function persistSims() {
+    localStorage.setItem(SIM_KEY, JSON.stringify(SIM_RESULTS));
+  }
   function simSignature(p) {
     return [p.R0, p.WC_R0, p.k, p.g, p.S].join('|');
   }
@@ -1184,6 +1195,7 @@
     const sim = estimateExcess(p);
     if (!sim) return null;
     SIM_RESULTS[name] = Object.assign({ sig: simSignature(p), ts: Date.now() }, sim);
+    persistSims();
     return SIM_RESULTS[name];
   }
 
@@ -1478,27 +1490,38 @@
   let currentFilter = 'all';
 
   function renderOverview() {
-    // Priority/Excluded tiles describe the *curated* screening only. User-added
-    // pathogens get their own Custom tile so the masthead arithmetic
-    // (priority + excluded + custom = total) always adds up regardless of
-    // which bucket a custom one lands in.
-    const counts = { all: 0, priority: 0, excluded: 0, under_eval: 0, unassessed: 0, custom: 0 };
+    // Tiles report curated screening; per-tile "+N custom" sublines surface
+    // user-added pathogens. Filter chips count everything so users can
+    // still find any custom entry by its bucket.
+    const cur = { priority: 0, excluded: 0, under_eval: 0, unassessed: 0 };
+    const cus = { priority: 0, excluded: 0, under_eval: 0, unassessed: 0 };
+    let nCur = 0, nCus = 0;
     for (const p of BASELINE.values()) {
       const b = effectiveDecision(p.name).bucket;
-      counts.all++;
-      if (isCustom(p.name)) {
-        counts.custom++;
-      } else {
-        counts[b] = (counts[b] || 0) + 1;
-      }
+      if (isCustom(p.name)) { cus[b] = (cus[b] || 0) + 1; nCus++; }
+      else                  { cur[b] = (cur[b] || 0) + 1; nCur++; }
     }
-    document.getElementById('stat-priority').textContent = counts.priority;
-    document.getElementById('stat-excluded').textContent = counts.excluded;
-    document.getElementById('stat-custom').textContent   = counts.custom;
-    document.getElementById('stat-custom-wrap').style.display = counts.custom > 0 ? '' : 'none';
-    document.getElementById('stat-total').textContent    = counts.all;
-    document.getElementById('lead-n-total').textContent  = counts.all;
+    document.getElementById('stat-priority').textContent = cur.priority;
+    document.getElementById('stat-excluded').textContent = cur.excluded;
+    document.getElementById('stat-total').textContent    = nCur;
+    document.getElementById('lead-n-total').textContent  = nCur + nCus;
 
+    // Per-tile sublines — visible only when at least one custom exists.
+    function sub(id, n) {
+      const el = document.getElementById(id);
+      el.querySelector('span').textContent = n;
+      el.style.display = nCus > 0 ? '' : 'none';
+    }
+    sub('stat-priority-custom', cus.priority);
+    sub('stat-excluded-custom', cus.excluded);
+    sub('stat-total-custom',    nCus);
+
+    // Filter chip counts include both curated and custom entries.
+    const counts = {
+      all: nCur + nCus,
+      priority: cur.priority + cus.priority,
+      excluded: cur.excluded + cus.excluded,
+    };
     Object.entries(counts).forEach(([k, v]) => {
       const el = document.getElementById('count-' + k);
       if (el) el.textContent = v;
@@ -1855,6 +1878,7 @@
       if (confirm(`Reset all overrides for ${name}?`)) {
         resetPathogen(name);
         delete SIM_RESULTS[name];
+        persistSims();
         renderPathogenDetail(name);
       }
     });
@@ -2074,6 +2098,7 @@
     if (confirm('Reset all overrides? This cannot be undone.')) {
       resetAll();
       Object.keys(SIM_RESULTS).forEach(k => delete SIM_RESULTS[k]);
+      persistSims();
       renderOverview();
     }
   });
