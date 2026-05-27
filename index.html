@@ -712,6 +712,21 @@
     font-family: 'Spectral', serif; font-style: italic; font-size: 13px;
     color: var(--ink-faint); padding: 14px 0;
   }
+  .d-toggle-row {
+    display: flex; align-items: baseline; gap: 14px;
+    padding: 10px 0; border-top: 1px dashed var(--rule-soft);
+    border-bottom: 1px dashed var(--rule-soft); margin: 10px 0 18px;
+  }
+  .d-toggle {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px;
+    color: var(--ink); display: inline-flex; align-items: center;
+    gap: 8px; cursor: pointer;
+  }
+  .d-toggle input[type="checkbox"] { accent-color: var(--accent); }
+  .d-toggle-hint {
+    font-family: 'Spectral', serif; font-style: italic; font-size: 12px;
+    color: var(--ink-faint);
+  }
 
   /* Footnote / footer */
   .footnote-block {
@@ -4471,7 +4486,10 @@
   // are merged into BASELINE on load so they get the same plumbing
   // (override + sim + screen) as curated rows; the source: 'user' field
   // is how downstream code distinguishes them.
-  const BASELINE = new Map(RAW.map(p => [p.name, Object.freeze({...p, source: 'curated'})]));
+  // `ignore_imports_in_risk` is a dashboard-only flag (no sheet column);
+  // unchecked by default. Listed first so any JSON value wins.
+  const BASELINE = new Map(RAW.map(p => [p.name,
+    Object.freeze({ ignore_imports_in_risk: false, ...p, source: 'curated' })]));
 
   const STORAGE_KEY = 'wc-risk-overrides-v1';
   let OVERRIDES = (() => {
@@ -4771,23 +4789,32 @@
     const imp  = state.excess_importation ?? 0;
     const pres = state.presence_at_wc     ?? 0;
     const cost = state.total_cost_per_case ?? 0;
+    const ignoreImports = !!state.ignore_imports_in_risk;
 
     const impTerm   = imp * wcM;
     const presTerm  = (ncM != null) ? pres * (wcM - ncM) : 0;
-    const excess    = impTerm + presTerm;
+    // When `ignoreImports` is set (e.g. Hep B), subtract the raw import
+    // count from excess cases — the imported cases themselves don't
+    // generate domestic medical costs, but their downstream transmission
+    // still does, so we keep imp*(wcM−1) + presTerm rather than dropping
+    // impTerm entirely. Excess cases AND risk value both reflect this.
+    const impAdj    = ignoreImports ? imp : 0;
+    const excess    = impTerm + presTerm - impAdj;
+    // Subtracting a user-entered constant doesn't shift variance, so the
+    // SD formula is the same with or without the flag.
     const excessVar = imp * imp * wcS * wcS
                     + pres * pres * (wcS * wcS + ncS * ncS);
     const excessSd  = Math.sqrt(Math.max(0, excessVar));
-    const risk      = excess * cost;
-    const riskSd    = excessSd * cost;
+    const risk   = excess * cost;
+    const riskSd = excessSd * cost;
 
     return {
       source: useSim ? 'sim' : 'baseline',
       wcM, wcS, ncM, ncS,
-      imp, pres, cost,
+      imp, pres, cost, ignoreImports, impAdj,
       impTerm, presTerm,
       excess_cases_mean: excess, excess_cases_sd: excessSd,
-      risk_value_mean: risk,     risk_value_sd:   riskSd
+      risk_value_mean:   risk,   risk_value_sd:   riskSd
     };
   }
 
@@ -5118,16 +5145,20 @@
     const hasPresence = d.pres > 0 && d.ncM != null;
     const costDirty   = (d.cost !== base.total_cost_per_case);
 
-    // Excess-cases equation
-    const formExc = hasPresence
+    // Excess-cases equation. The "− imports" tail appears only when the
+    // ignore-imports toggle is set: it removes the imported cases
+    // themselves while keeping the transmission they generate.
+    const minusImp = d.ignoreImports ? ` − ${fmtPlain(d.imp)}` : '';
+    const minusImpForm = d.ignoreImports ? ' − imports' : '';
+    const formExc = (hasPresence
       ? 'imports × WC outbreak + presence × (WC − non-WC)'
-      : 'imports × WC outbreak';
-    const substExc = hasPresence
+      : 'imports × WC outbreak') + minusImpForm;
+    const substExc = (hasPresence
       ? `${fmtPlain(d.imp)} × ${fmtPlain(d.wcM)} + ${fmtPlain(d.pres)} × (${fmtPlain(d.wcM)} − ${fmtPlain(d.ncM)})`
-      : `${fmtPlain(d.imp)} × ${fmtPlain(d.wcM)}`;
-    const sumExc = hasPresence
+      : `${fmtPlain(d.imp)} × ${fmtPlain(d.wcM)}`) + minusImp;
+    const sumExc = (hasPresence
       ? `${fmtPlain(d.impTerm)} + ${fmtPlain(d.presTerm)}`
-      : `${fmtPlain(d.impTerm)}`;
+      : `${fmtPlain(d.impTerm)}`) + minusImp;
     const sdExc = d.excess_cases_sd > 0
       ? `<span class="d-sd">± ${fmtPlain(d.excess_cases_sd)}</span>` : '';
 
@@ -5149,6 +5180,19 @@
             ${hasPresence ? `<div class="d-line">= ${sumExc}</div>` : ''}
             <div class="d-line d-result">= ${fmtPlain(d.excess_cases_mean)} ${sdExc}</div>
           </div>
+        </div>
+
+        <div class="d-toggle-row">
+          <label class="d-toggle">
+            <input type="checkbox" data-edit="ignore_imports_in_risk"
+              ${d.ignoreImports ? 'checked' : ''}>
+            Subtract imports from excess cases
+          </label>
+          <span class="d-toggle-hint">
+            ${d.ignoreImports
+              ? 'Imported cases don’t count; their downstream transmission still does (Hep B-style).'
+              : 'Every excess case counts toward risk, including imports.'}
+          </span>
         </div>
 
         <div class="d-eq">
@@ -5421,6 +5465,12 @@
         const value = raw === '' ? null : Number(raw);
         if (raw !== '' && Number.isNaN(value)) return;
         setOverride(name, field, value);
+        renderPathogenDetail(name);
+      });
+    });
+    host.querySelectorAll('input[type="checkbox"][data-edit]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        setOverride(name, inp.dataset.edit, inp.checked);
         renderPathogenDetail(name);
       });
     });
