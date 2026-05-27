@@ -794,6 +794,10 @@
         <div class="ostat-label">Excluded</div>
         <div class="ostat-value" id="stat-excluded">—</div>
       </div>
+      <div class="ostat" id="stat-custom-wrap" style="display:none;">
+        <div class="ostat-label">Custom</div>
+        <div class="ostat-value" id="stat-custom">—</div>
+      </div>
       <div class="ostat">
         <div class="ostat-label">Total tracked</div>
         <div class="ostat-value" id="stat-total">—</div>
@@ -1474,15 +1478,24 @@
   let currentFilter = 'all';
 
   function renderOverview() {
-    // Effective counts across both curated and user-added pathogens.
-    const counts = { all: 0, priority: 0, excluded: 0, under_eval: 0, unassessed: 0 };
+    // Priority/Excluded tiles describe the *curated* screening only. User-added
+    // pathogens get their own Custom tile so the masthead arithmetic
+    // (priority + excluded + custom = total) always adds up regardless of
+    // which bucket a custom one lands in.
+    const counts = { all: 0, priority: 0, excluded: 0, under_eval: 0, unassessed: 0, custom: 0 };
     for (const p of BASELINE.values()) {
       const b = effectiveDecision(p.name).bucket;
       counts.all++;
-      counts[b] = (counts[b] || 0) + 1;
+      if (isCustom(p.name)) {
+        counts.custom++;
+      } else {
+        counts[b] = (counts[b] || 0) + 1;
+      }
     }
     document.getElementById('stat-priority').textContent = counts.priority;
     document.getElementById('stat-excluded').textContent = counts.excluded;
+    document.getElementById('stat-custom').textContent   = counts.custom;
+    document.getElementById('stat-custom-wrap').style.display = counts.custom > 0 ? '' : 'none';
     document.getElementById('stat-total').textContent    = counts.all;
     document.getElementById('lead-n-total').textContent  = counts.all;
 
