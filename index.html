@@ -363,6 +363,24 @@
   .trace-step.is-decisive .trace-value { color: var(--accent); }
   .trace-step.is-muted .trace-label,
   .trace-step.is-muted .trace-value { color: var(--ink-faint); }
+  /* Final "Decision" row — the conclusion of the screening. Bucket color
+     on the verdict, slightly heavier weight, no bottom rule so it reads
+     as the closing line. */
+  .trace-step.is-decision {
+    border-bottom: none; padding-top: 14px;
+    border-top: 2px solid var(--ink); margin-top: 4px;
+  }
+  .trace-step.is-decision .trace-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .trace-step.is-decision .trace-value {
+    font-size: 14px; font-weight: 600; color: var(--ink);
+  }
+  .trace-step.is-decision[data-bucket="priority"]   .trace-value { color: var(--priority); }
+  .trace-step.is-decision[data-bucket="excluded"]   .trace-value { color: var(--excluded); }
+  .trace-step.is-decision[data-bucket="under_eval"] .trace-value { color: var(--under-eval); }
 
   /* Edit form */
   .edit-section { margin-bottom: 24px; }
@@ -373,6 +391,35 @@
     text-transform: uppercase; letter-spacing: 0.08em;
   }
   .edit-group { margin-bottom: 16px; }
+  /* A question that the current screening path doesn't reach is shown
+     faded but still editable — toggling earlier answers brings it back
+     into play, so we don't fully hide or disable it. */
+  .edit-group.is-irrelevant { opacity: 0.4; }
+  .edit-group.is-irrelevant .edit-label::after {
+    content: 'not relevant for current path';
+    margin-left: 8px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; color: var(--ink-faint);
+    letter-spacing: 0.08em; text-transform: uppercase; font-weight: 400;
+  }
+  .edit-section-note {
+    font-family: 'Spectral', serif; font-style: italic; font-size: 12px;
+    color: var(--ink-faint); line-height: 1.5; margin: -2px 0 14px;
+  }
+  /* Pathogen attributes list on the LEFT column — compact checkboxes,
+     not full tristate, since they're context rather than screening
+     inputs. */
+  .attr-list { margin-top: 8px; }
+  .attr-item {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px;
+    color: var(--ink); padding: 4px 0; cursor: pointer;
+  }
+  .attr-item input[type="checkbox"] { accent-color: var(--accent); }
+  .attr-item .dirty-mark {
+    margin-left: auto; color: var(--accent); font-size: 9px;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
   .edit-label {
     font-family: 'IBM Plex Sans', sans-serif; font-size: 13px;
     color: var(--ink-soft); margin-bottom: 6px;
@@ -425,6 +472,10 @@
   }
   .num-input:focus { outline: none; border-color: var(--accent); }
   .num-input.is-dirty { background: var(--paper-tint); border-color: var(--accent); }
+  .num-input.is-locked {
+    background: var(--rule-soft); color: var(--ink-faint);
+    cursor: not-allowed; border-style: dashed;
+  }
 
   /* Action buttons */
   .detail-actions {
@@ -4570,6 +4621,17 @@
     if (x === null || x === undefined || Number.isNaN(x)) return '—';
     return '$' + Math.round(x).toLocaleString();
   }
+  // Any of these "Pathogen attribute" flags being yes implies R0 in the
+  // WC context is effectively 0: humans are dead-end hosts (no h2h),
+  // the local vector isn't present (vector-borne disease can't spread),
+  // or the disease only spreads in healthcare settings (not at WC
+  // events). Each case stays a single case → per-case outbreak size = 1.
+  function hasNoTransmission(state) {
+    return state.dead_end_host   === 'yes'
+        || state.vector_absent   === 'yes'
+        || state.healthcare_only === 'yes';
+  }
+
   function tristateLabel(v) {
     if (v === 'yes') return 'Yes';
     if (v === 'no')  return 'No';
@@ -4615,15 +4677,20 @@
   }
   function rpoisson(lambda) {
     if (lambda <= 0) return 0;
-    // Knuth's algorithm; switch to normal approximation for large lambda
-    // where Knuth gets slow.
-    if (lambda < 30) {
+    // Knuth's exact algorithm. Pushed higher than the previous 30 cutoff
+    // because the normal approximation drops the Poisson's right skew on
+    // small lambda; at lambda=100 the negative tail (Z<-10) is
+    // effectively zero so truncation bias doesn't matter, and Knuth is
+    // still fast enough at n=10k iterations.
+    if (lambda < 100) {
       const L = Math.exp(-lambda);
       let k = 0, p = 1;
       do { k++; p *= Math.random(); } while (p > L);
       return k - 1;
     }
-    const x = lambda + Math.sqrt(lambda) * rnorm();
+    // Normal approximation with continuity correction. P(X<0) is ≪ 1e-15
+    // here, so the max(0, …) clamp is just defensive.
+    const x = lambda + Math.sqrt(lambda) * rnorm() - 0.5;
     return Math.max(0, Math.round(x));
   }
   function rnbinom(size, mu) {
@@ -4634,14 +4701,21 @@
   }
 
   // Returns { mean, sd } of the per-case outbreak size distribution.
+  // Mirrors simple_branching() in scripts/google_sheets_outbreak.R: each
+  // iteration draws a fresh arrival time uniformly from 1..max_time
+  // (days) and converts that into a generation count via
+  // round(arrival/generation_time), floored at 1. This per-iteration
+  // sampling is what the sheet's cached `WC Per case outbreak size`
+  // values are computed from — without it, the JS sim drifts upward
+  // for short generation times because every iteration would run the
+  // full chain depth.
   function simulate_branching(n, mu, k, max_time, generation_time) {
     if (mu == null || k == null || generation_time == null) return null;
     if (mu <= 0 || k <= 0 || generation_time <= 0) return { mean: 1, sd: 0 };
-    // FIX: R code has `min(1, ...)` which always evaluates to 1.
-    // Use max() so the configured max_time actually controls depth.
-    const generations = Math.max(1, Math.round(max_time / generation_time));
     let sum = 0, sumSq = 0;
     for (let i = 0; i < n; i++) {
+      const arrival     = 1 + Math.floor(Math.random() * max_time);
+      const generations = Math.max(1, Math.round(arrival / generation_time));
       let current = 1, total = 1;
       for (let j = 0; j < generations; j++) {
         const off = rnbinom(k * current, mu * current);
@@ -4653,11 +4727,15 @@
       sumSq += total * total;
     }
     const mean = sum / n;
-    const variance = Math.max(0, sumSq / n - mean * mean);
+    // Sample variance (÷n−1) to match R's sd(); the cached sheet values
+    // are computed that way.
+    const variance = n > 1
+      ? Math.max(0, (sumSq - n * mean * mean) / (n - 1))
+      : 0;
     return { mean, sd: Math.sqrt(variance) };
   }
 
-  const SIM_DEFAULTS = { n: 1000, max_time: 17 };
+  const SIM_DEFAULTS = { n: 10000, max_time: 17 };
 
   // estimateExcess: mirrors estimate_excess() in R. Returns the four
   // sheet columns plus a parameter signature used to detect staleness
@@ -4669,7 +4747,12 @@
     const nonwc = simulate_branching(SIM_DEFAULTS.n, R0 * S, k, SIM_DEFAULTS.max_time, g);
     let wc;
     if (WC_R0 == null || Number.isNaN(WC_R0)) {
-      wc = nonwc; // R code: if WC_R0 is NA, assume WC_R0 = R0.
+      // Dashboard-only fallback: missing WC R0 → assume WC R0 = R0 so
+      // we have something to show. The R reference
+      // (scripts/google_sheets_outbreak.R) does NOT do this — it lets
+      // NA propagate. Diverges intentionally so the user gets a number
+      // for the WC arm when only the baseline R0 is set.
+      wc = nonwc;
     } else {
       wc = simulate_branching(SIM_DEFAULTS.n, WC_R0 * S, k, SIM_DEFAULTS.max_time, g);
     }
@@ -4688,11 +4771,13 @@
     const imp     = p.excess_importation ?? 0;
     const pres    = p.presence_at_wc     ?? 0;
     const cost    = p.total_cost_per_case ?? 0;
+    // excess = imp*wcM + pres*(wcM − ncM) = (imp + pres)*wcM − pres*ncM,
+    // with wcM and ncM independent → Var = (imp+pres)² wcS² + pres² ncS².
     const excess  = imp * sim.wc_outbreak_mean
                   + pres * (sim.wc_outbreak_mean - sim.nonwc_outbreak_mean);
-    const var_ec  = imp * imp * sim.wc_outbreak_sd * sim.wc_outbreak_sd
-                  + pres * pres * (sim.wc_outbreak_sd * sim.wc_outbreak_sd
-                                 + sim.nonwc_outbreak_sd * sim.nonwc_outbreak_sd);
+    const ip      = imp + pres;
+    const var_ec  = ip * ip * sim.wc_outbreak_sd * sim.wc_outbreak_sd
+                  + pres * pres * sim.nonwc_outbreak_sd * sim.nonwc_outbreak_sd;
     const excess_sd = Math.sqrt(Math.max(0, var_ec));
     const risk    = excess * cost;
     const risk_sd = excess_sd * cost;
@@ -4725,6 +4810,18 @@
   }
   function runSim(name) {
     const p = effective(name);
+    // No-transmission attributes pin per-case outbreak size to 1; the
+    // branching simulator has nothing to do. Write a synthetic result
+    // (with the current input signature so it isn't reported stale).
+    if (hasNoTransmission(p)) {
+      SIM_RESULTS[name] = {
+        sig: simSignature(p), ts: Date.now(),
+        wc_outbreak_mean: 1, wc_outbreak_sd: 0,
+        nonwc_outbreak_mean: 1, nonwc_outbreak_sd: 0,
+      };
+      persistSims();
+      return SIM_RESULTS[name];
+    }
     const sim = estimateExcess(p);
     if (!sim) return null;
     SIM_RESULTS[name] = Object.assign({ sig: simSignature(p), ts: Date.now() }, sim);
@@ -4741,10 +4838,20 @@
     const sim   = getSim(name);
     const useSim = sim && !sim.stale;
 
-    const wcM = useSim ? sim.wc_outbreak_mean    : state.wc_outbreak_size;
-    const wcS = useSim ? sim.wc_outbreak_sd      : 0;
-    const ncM = useSim ? sim.nonwc_outbreak_mean : state.nonwc_outbreak_size;
-    const ncS = useSim ? sim.nonwc_outbreak_sd   : 0;
+    // Attributes that imply no onward transmission at WC events: each
+    // case stays a single case, so the per-case outbreak size collapses
+    // to 1 regardless of R0/k/g/S or any simulation result.
+    const noTransmission = hasNoTransmission(state);
+
+    let wcM, wcS, ncM, ncS;
+    if (noTransmission) {
+      wcM = 1; wcS = 0; ncM = 1; ncS = 0;
+    } else {
+      wcM = useSim ? sim.wc_outbreak_mean    : state.wc_outbreak_size;
+      wcS = useSim ? sim.wc_outbreak_sd      : 0;
+      ncM = useSim ? sim.nonwc_outbreak_mean : state.nonwc_outbreak_size;
+      ncS = useSim ? sim.nonwc_outbreak_sd   : 0;
+    }
 
     if (wcM == null) return null;
 
@@ -4762,10 +4869,13 @@
     // impTerm entirely. Excess cases AND risk value both reflect this.
     const impAdj    = ignoreImports ? imp : 0;
     const excess    = impTerm + presTerm - impAdj;
-    // Subtracting a user-entered constant doesn't shift variance, so the
-    // SD formula is the same with or without the flag.
-    const excessVar = imp * imp * wcS * wcS
-                    + pres * pres * (wcS * wcS + ncS * ncS);
+    // excess = imp*wcM + pres*(wcM − ncM) [− imp] = (imp+pres)*wcM − pres*ncM [− imp],
+    // with wcM and ncM independent → Var = (imp+pres)² wcS² + pres² ncS².
+    // The − imp adjustment is a user-entered constant, so it doesn't shift
+    // variance.
+    const ip        = imp + pres;
+    const excessVar = ip * ip * wcS * wcS
+                    + pres * pres * ncS * ncS;
     const excessSd  = Math.sqrt(Math.max(0, excessVar));
     const risk   = excess * cost;
     const riskSd = excessSd * cost;
@@ -4816,14 +4926,32 @@
     };
     const decide = (bucket, reason) => {
       if (trace.length) trace[trace.length - 1].decisive = true;
+      push('Decision', decisionLabel(bucket).toUpperCase(),
+           { isDecision: true, bucket });
       return { bucket, reason, trace };
+    };
+    const inProcess = (reason) => {
+      if (trace.length) trace[trace.length - 1].decisive = true;
+      push('Decision', 'IN PROCESS', { isDecision: true, bucket: 'under_eval' });
+      return { bucket: 'under_eval', reason, trace };
     };
 
     push('Endemicity', p.endemic ? 'Endemic' : 'Non-endemic');
 
+    // Curator-set "no acute sequelae" exclusion can't be derived from the
+    // screening tree; if the flag is set, respect it and exit early so
+    // the bucket matches the curator's call.
+    if (p.endemic && p.excl_endemic_no_acute) {
+      push('No acute sequelae of infection', 'yes');
+      return decide('excluded', 'excl_endemic_no_acute');
+    }
+
     if (!p.endemic) {
       // Non-endemic path
       push('Q1 · Can establish local transmission?', tristateLabel(p.can_establish));
+      if (p.can_establish !== 'yes' && p.can_establish !== 'no') {
+        return inProcess('q1_unknown');
+      }
       const imp = p.excess_importation;
       if (p.can_establish === 'yes') {
         if (imp != null && imp > 0) {
@@ -4834,15 +4962,29 @@
           push('Excess imports > 0', '0 (no)');
           return decide('excluded', 'excl_nonendemic_no_imports');
         }
+        // can_establish === 'yes' AND imp is null → don't know
+        push('Excess imports > 0', '—');
+        return inProcess('imports_unknown');
       } else if (imp === 0) {
         push('Excess imports > 0', '0 (no)');
         return decide('excluded', 'excl_nonendemic_no_imports');
+      } else if (imp == null) {
+        // can_establish === 'no' AND imp unknown → don't know
+        push('Excess imports > 0', '—');
+        return inProcess('imports_unknown');
       }
+      // can_establish === 'no' AND imp > 0 → fall through to threshold step
     } else {
       // Endemic path
       push('Q2 · Increased WC transmission?', tristateLabel(p.wc_elev_transmit));
+      if (p.wc_elev_transmit !== 'yes' && p.wc_elev_transmit !== 'no') {
+        return inProcess('q2_unknown');
+      }
       if (p.wc_elev_transmit !== 'yes') {
         push('Q3 · Imports significant vs prevalence (>5%)?', tristateLabel(p.imports_gt_5pct));
+        if (p.imports_gt_5pct !== 'yes' && p.imports_gt_5pct !== 'no') {
+          return inProcess('q3_unknown');
+        }
         if (p.imports_gt_5pct === 'no') {
           return decide('excluded', 'excl_endemic_no_wc_transmit');
         }
@@ -4851,18 +4993,42 @@
       }
     }
 
-    // Outbreak risk + impact screen
-    push('Q4 · Humans dead-end hosts?',  tristateLabel(p.dead_end_host));
-    push('Q5 · Lack competent vector?',  tristateLabel(p.vector_absent));
-    push('Q6 · Healthcare-associated?',  tristateLabel(p.healthcare_only));
+    // Risk threshold. Need both a risk value AND populated transmission
+    // parameters before we trust an above/below verdict — otherwise the
+    // pathogen is still being worked up. Attribute flags that imply no
+    // onward transmission (dead-end host, no competent vector,
+    // healthcare-associated only) collapse the per-case outbreak size to
+    // 1, so R0/k/g/S aren't needed in that case.
+    const noTransmission = hasNoTransmission(p);
+    const paramsKnown    = noTransmission
+                        || (p.R0 != null && p.k != null && p.g != null && p.S != null);
+    // Cost is always needed to land a risk_value, whether or not the
+    // pathogen has onward transmission. Without it screen() would
+    // silently compute risk = 0 and exclude.
+    const costKnown      = p.total_cost_per_case != null;
 
-    // Risk threshold
+    // Show the risk derivation in the trace when we have the inputs to
+    // do it: per-case outbreak size → excess cases → risk value. Mirrors
+    // the Computed values section so the trace tells the same story.
+    if (p.wc_outbreak_size != null) {
+      const wcLabel = noTransmission
+        ? `${fmt(p.wc_outbreak_size)}  (no onward transmission)`
+        : fmt(p.wc_outbreak_size);
+      push('Per-case outbreak size', wcLabel);
+    }
+    if (p.excess_outbreak_cases != null) {
+      push('Excess cases', fmt(p.excess_outbreak_cases));
+    }
+
     const wcr = p.risk_value;
     const wcrLabel = wcr == null ? '—' : fmtMoney(wcr);
     push(`Risk value vs threshold Q = ${fmtMoney(q)}`, wcrLabel);
 
-    if (wcr == null) {
-      return { bucket: 'under_eval', reason: 'pending_params', trace };
+    if (wcr == null || !paramsKnown || !costKnown) {
+      const reason = wcr == null      ? 'pending_params'
+                   : !costKnown       ? 'cost_unknown'
+                                      : 'parameters_incomplete';
+      return inProcess(reason);
     }
     if (wcr >= q) {
       return decide('priority',
@@ -4893,6 +5059,21 @@
       'Pending parameter review.'
   };
 
+  // Order matches screen()'s walk: clinical (no_acute) first, then the
+  // Q-independent screening exits (no_wc_transmit / no_imports /
+  // can_establish), then the Q-dependent thresholds. Picking the first
+  // hit reflects the earliest decisive branch.
+  const REASON_PRIORITY = [
+    'excl_endemic_no_acute',
+    'excl_endemic_no_wc_transmit',
+    'excl_nonendemic_no_imports',
+    'incl_nonendemic_can_establish',
+    'incl_endemic_risk_above',
+    'incl_nonendemic_risk_above',
+    'excl_endemic_risk_below',
+    'excl_nonendemic_risk_below',
+  ];
+
   // For an unedited pathogen, prefer the curator-set reason from baseline
   // flags (richer than what screen() can produce — e.g. no_acute is a
   // clinical judgment). For an edited pathogen, use screen()'s reason key.
@@ -4901,15 +5082,11 @@
       const result = screen(state, THRESHOLD_Q);
       return REASONS[result.reason] || 'Pending review.';
     }
-    // Baseline path — pick the first flag that's set.
-    if (state.incl_endemic_risk_above)       return REASONS.incl_endemic_risk_above;
-    if (state.incl_nonendemic_can_establish) return REASONS.incl_nonendemic_can_establish;
-    if (state.incl_nonendemic_risk_above)    return REASONS.incl_nonendemic_risk_above;
-    if (state.excl_endemic_no_acute)         return REASONS.excl_endemic_no_acute;
-    if (state.excl_endemic_no_wc_transmit)   return REASONS.excl_endemic_no_wc_transmit;
-    if (state.excl_endemic_risk_below)       return REASONS.excl_endemic_risk_below;
-    if (state.excl_nonendemic_no_imports)    return REASONS.excl_nonendemic_no_imports;
-    if (state.excl_nonendemic_risk_below)    return REASONS.excl_nonendemic_risk_below;
+    const setFlags = REASON_PRIORITY.filter(k => state[k]);
+    if (setFlags.length > 1 && typeof console !== 'undefined') {
+      console.warn(`reasonFor: multiple flags set for ${state.name || '?'}: ${setFlags.join(', ')}; picking ${setFlags[0]}`);
+    }
+    if (setFlags.length) return REASONS[setFlags[0]];
     if (state.decision === 'excluded')
       return 'Excluded by curator; specific screening flag not yet recorded in the source sheet.';
     if (state.decision === 'priority')
@@ -4943,18 +5120,15 @@
     const custom     = base.source === 'user';
     const overridden = isOverridden(name) || hasSim || custom;
     const state      = stateWithSim(name);
-
-    // A pathogen's bucket depends on Q only if its baseline screening
-    // reached the risk-threshold step. Q-independent exclusions
-    // (no_acute, no_wc_transmit, no_imports, can_establish) must stick
-    // when the user moves the global Q, or the list re-shuffles wrongly.
-    const qDependent = state.excl_endemic_risk_below
-                    || state.incl_endemic_risk_above
-                    || state.excl_nonendemic_risk_below
-                    || state.incl_nonendemic_risk_above;
     const qChanged   = THRESHOLD_Q !== Q_DEFAULT;
 
-    if (!overridden && !(qChanged && qDependent)) {
+    // Defer to the curator's stored decision unless something has changed.
+    // Any per-pathogen edit, sim, or custom row → screen() runs. Q moving
+    // away from default also forces a re-screen for every pathogen; for
+    // Q-independent exits (no_acute / no_wc_transmit / no_imports /
+    // can_establish) screen() reproduces the same bucket on its own, so
+    // we no longer need a curator-flag shortcut to gate re-screening.
+    if (!overridden && !qChanged) {
       return { bucket: base.decision, reason: reasonFor(state, false), state, override: false, sim: null };
     }
     const result = screen(state, THRESHOLD_Q);
@@ -5198,8 +5372,11 @@
   }
 
   function renderTraceStep(t, idx) {
-    const cls = (t.decisive ? ' is-decisive' : '') + (t.muted ? ' is-muted' : '');
-    return `<div class="trace-step${cls}">
+    const cls = (t.decisive ? ' is-decisive' : '')
+              + (t.muted ? ' is-muted' : '')
+              + (t.isDecision ? ' is-decision' : '');
+    const bucketAttr = t.bucket ? ` data-bucket="${t.bucket}"` : '';
+    return `<div class="trace-step${cls}"${bucketAttr}>
       <span class="trace-num">${String(idx + 1).padStart(2, '0')}</span>
       <span class="trace-label">${escapeHtml(t.label)}</span>
       <span class="trace-value">${escapeHtml(t.value)}</span>
@@ -5220,9 +5397,24 @@
     `;
   }
 
-  function numEditor(field, label, current, baseline) {
+  function numEditor(field, label, current, baseline, opts = {}) {
     const dirty = (current !== baseline) && !(current == null && baseline == null);
     const val = (current == null || Number.isNaN(current)) ? '' : current;
+    // `locked` is used for transmission parameters that are pinned to 0
+    // when a "no transmission" attribute (dead-end host, no vector,
+    // healthcare-only) is set. The displayed value reflects what the
+    // model effectively uses; we don't write the 0 back to the override.
+    if (opts.locked) {
+      return `
+        <div class="num-cell">
+          <span class="num-label">${label}</span>
+          <input type="number" step="any" inputmode="decimal"
+            class="num-input is-locked"
+            value="0" disabled
+            title="${opts.lockedReason || 'No onward transmission attribute is set; this parameter is pinned to 0.'}">
+        </div>
+      `;
+    }
     return `
       <div class="num-cell">
         <span class="num-label">${label}</span>
@@ -5234,16 +5426,31 @@
     `;
   }
 
-  function flagGroup(qnum, label, field, state, base) {
+  function flagGroup(qnum, label, field, state, base, relevant = true) {
     const dirty = (state[field] !== base[field]);
     return `
-      <div class="edit-group">
+      <div class="edit-group${relevant ? '' : ' is-irrelevant'}">
         <div class="edit-label">
-          <span class="qnum">${qnum}</span> ${label}
+          ${qnum ? `<span class="qnum">${qnum}</span> ` : ''}${label}
           ${dirty ? '<span class="dirty-mark">edited</span>' : ''}
         </div>
         ${tristateEditor(field, state[field], base[field])}
       </div>
+    `;
+  }
+
+  // Compact checkbox row for a tristate "attribute". Checked = 'yes',
+  // unchecked = 'no' (collapses the null/unknown state, which is fine
+  // for context-only fields that don't influence bucketing).
+  function attrCheckbox(label, field, state, base) {
+    const dirty = (state[field] !== base[field]);
+    const checked = state[field] === 'yes';
+    return `
+      <label class="attr-item">
+        <input type="checkbox" data-edit-tristate="${field}" ${checked ? 'checked' : ''}>
+        <span>${label}</span>
+        ${dirty ? '<span class="dirty-mark">edited</span>' : ''}
+      </label>
     `;
   }
 
@@ -5259,6 +5466,16 @@
     const state = eff.state;
     const baseDecision = base.decision;
     const traceResult  = screen(state, THRESHOLD_Q);
+    // Reconcile the trace's terminal Decision row with the bucket the
+    // masthead/badge will display. When `effectiveDecision` short-circuits
+    // to `base.decision`, that can disagree with `screen()` (data
+    // anomalies, partially-filled rows). Mirror the badge so the user
+    // doesn't see two different verdicts on the same page.
+    const lastStep = traceResult.trace[traceResult.trace.length - 1];
+    if (lastStep && lastStep.isDecision && lastStep.bucket !== eff.bucket) {
+      lastStep.value  = decisionLabel(eff.bucket).toUpperCase();
+      lastStep.bucket = eff.bucket;
+    }
     const wasChanged   = eff.override && eff.bucket !== baseDecision;
     const sim          = getSim(name);
     const hasSim       = !!sim;
@@ -5298,27 +5515,30 @@
       <div class="detail-reason">${eff.reason}</div>
 
       <div class="detail-cols">
-        <!-- LEFT: decision trace -->
+        <!-- LEFT: editable inputs — attributes (context), then screening answers, then numeric inputs -->
         <div>
-          <div class="detail-col-h">Decision trace</div>
-          ${traceResult.trace.map(renderTraceStep).join('')}
-        </div>
+          <div class="detail-col-h">Pathogen attributes</div>
+          <p class="edit-section-note">
+            Recorded for context; the dashboard's screening logic
+            doesn't branch on these, so editing them won't move the
+            bucket.
+          </p>
+          <div class="attr-list" style="margin-bottom: 28px;">
+            ${attrCheckbox('Humans are dead-end hosts',  'dead_end_host',   state, base)}
+            ${attrCheckbox('Lacks competent vector',     'vector_absent',   state, base)}
+            ${attrCheckbox('Healthcare-associated only', 'healthcare_only', state, base)}
+          </div>
 
-        <!-- RIGHT: editable inputs -->
-        <div>
           <div class="detail-col-h">Screening answers</div>
 
           ${endemicEditor}
 
-          ${!state.endemic ? flagGroup('Q1', 'Can establish local transmission?', 'can_establish',     state, base) : ''}
-          ${ state.endemic ? flagGroup('Q2', 'Increased WC transmission?',       'wc_elev_transmit',    state, base) : ''}
-          ${ state.endemic ? flagGroup('Q3', 'Imports significant vs prevalence (>5%)?', 'imports_gt_5pct', state, base) : ''}
-          ${flagGroup('Q4', 'Humans dead-end hosts?',         'dead_end_host',   state, base)}
-          ${flagGroup('Q5', 'Lack competent vector?',         'vector_absent',   state, base)}
-          ${flagGroup('Q6', 'Healthcare-associated only?',    'healthcare_only', state, base)}
+          ${flagGroup('Q1', 'Can establish local transmission?',        'can_establish',    state, base, !state.endemic)}
+          ${flagGroup('Q2', 'Increased WC transmission?',               'wc_elev_transmit', state, base,  state.endemic)}
+          ${flagGroup('Q3', 'Imports significant vs prevalence (>5%)?', 'imports_gt_5pct',  state, base,  state.endemic && state.wc_elev_transmit !== 'yes')}
 
           <div class="edit-section" style="margin-top:28px;">
-            <div class="edit-section-h">Inputs</div>
+            <div class="edit-section-h">Pathogen Presence</div>
             <div class="num-grid">
               ${numEditor('excess_importation', 'Excess imports', state.excess_importation, base.excess_importation)}
               ${state.endemic
@@ -5328,15 +5548,30 @@
           </div>
 
           <div class="edit-section" style="margin-top:24px;">
-            <div class="edit-section-h">Parameters</div>
-            <div class="num-grid">
-              ${numEditor('R0',    'R₀',     state.R0,     base.R0)}
-              ${numEditor('WC_R0', 'WC R₀',  state.WC_R0,  base.WC_R0)}
-              ${numEditor('k',     'k',      state.k,      base.k)}
-              ${numEditor('g',     'g',      state.g,      base.g)}
-              ${numEditor('S',     'S',      state.S,      base.S)}
-            </div>
+            <div class="edit-section-h">Model Parameters</div>
+            ${(() => {
+              const noTx = hasNoTransmission(state);
+              const lockedOpts = noTx
+                ? { locked: true, lockedReason: 'A "no onward transmission" attribute is set (dead-end host / no competent vector / healthcare-associated only). R₀ is effectively 0.' }
+                : {};
+              return `
+                ${noTx ? '<p class="edit-section-note">R₀ and WC R₀ are pinned to 0 because an attribute on the left implies no onward transmission. Uncheck that attribute to edit them.</p>' : ''}
+                <div class="num-grid">
+                  ${numEditor('R0',    'R₀',     state.R0,     base.R0,    lockedOpts)}
+                  ${numEditor('WC_R0', 'WC R₀',  state.WC_R0,  base.WC_R0, lockedOpts)}
+                  ${numEditor('k',     'k',      state.k,      base.k)}
+                  ${numEditor('g',     'g',      state.g,      base.g)}
+                  ${numEditor('S',     'S',      state.S,      base.S)}
+                </div>
+              `;
+            })()}
           </div>
+        </div>
+
+        <!-- RIGHT: decision trace -->
+        <div>
+          <div class="detail-col-h">Decision trace</div>
+          ${traceResult.trace.map(renderTraceStep).join('')}
         </div>
       </div>
 
@@ -5380,14 +5615,14 @@
           <button class="btn btn-run" id="run-sim">${hasSim ? 'Re-run simulation' : 'Run simulation'}</button>
           <span class="run-meta">
             ${hasSim
-              ? `Last run: ${new Date(sim.ts).toLocaleTimeString()} · n=${SIM_DEFAULTS.n} iterations, max_time=${SIM_DEFAULTS.max_time}d`
-              : `Click to simulate ${SIM_DEFAULTS.n} branching-process iterations with current inputs.`}
+              ? `Last run: ${new Date(sim.ts).toLocaleTimeString()} · n=${SIM_DEFAULTS.n.toLocaleString()} iterations, max_time=${SIM_DEFAULTS.max_time}d. Sheet baseline values use n=1,000,000.`
+              : `Click to simulate ${SIM_DEFAULTS.n.toLocaleString()} branching-process iterations with current inputs. Sheet baseline values use n=1,000,000.`}
           </span>
         </div>
       </div>
 
       <div class="detail-actions">
-        <button class="btn btn-warn" id="detail-reset" ${isOverridden(name) ? '' : 'disabled'}>Reset overrides</button>
+        <button class="btn btn-warn" id="detail-reset" ${(isOverridden(name) || SIM_RESULTS[name]) ? '' : 'disabled'}>Reset overrides</button>
         ${isCustom(name)
           ? '<button class="btn btn-warn" id="detail-remove">Remove pathogen</button>'
           : ''}
@@ -5436,11 +5671,21 @@
         renderPathogenDetail(name);
       });
     });
+    host.querySelectorAll('input[type="checkbox"][data-edit-tristate]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        setOverride(name, inp.dataset.editTristate, inp.checked ? 'yes' : 'no');
+        renderPathogenDetail(name);
+      });
+    });
     document.getElementById('detail-back').addEventListener('click', () => { location.hash = '#/'; });
     document.getElementById('detail-back-2').addEventListener('click', () => { location.hash = '#/'; });
     const resetBtn = document.getElementById('detail-reset');
     if (resetBtn) resetBtn.addEventListener('click', () => {
-      if (confirm(`Reset all overrides for ${name}?`)) {
+      const hasSimToClear = !!SIM_RESULTS[name];
+      const what = isOverridden(name) && hasSimToClear
+                 ? 'overrides and simulation result'
+                 : isOverridden(name) ? 'overrides' : 'simulation result';
+      if (confirm(`Reset ${what} for ${name}?`)) {
         resetPathogen(name);
         delete SIM_RESULTS[name];
         persistSims();
@@ -5658,7 +5903,7 @@
   });
 
   document.getElementById('reset-all-btn').addEventListener('click', () => {
-    if (confirm('Reset all overrides? This cannot be undone.')) {
+    if (confirm('Reset all overrides AND clear every simulation result? Custom pathogens are kept. This cannot be undone.')) {
       resetAll();
       Object.keys(SIM_RESULTS).forEach(k => delete SIM_RESULTS[k]);
       persistSims();
