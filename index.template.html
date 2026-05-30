@@ -20,9 +20,13 @@
     --accent-soft:#5a7a8a;
     --warn:       #a04545;
     --warn-soft:  #f0e0e0;
-    --priority:   #2f5061;
-    --excluded:   #b0a89a;
-    --under-eval: #c25a4a;
+    /* Bucket palette mirrors the sibling narrative
+       (wc-threat-assessment/narratives/index.html): included = red,
+       excluded = green. `--accent` stays blue for UI chrome (focus
+       borders, decisive-step highlight, buttons). */
+    --priority:   #c0392b;
+    --excluded:   #2d6a4f;
+    --under-eval: #c5873c;
     --unassessed: #d8d4cc;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -84,8 +88,9 @@
     color: var(--ink); margin-bottom: 8px;
   }
   .title-secondary {
-    font-family: 'Spectral', serif; font-weight: 400; font-style: italic;
-    font-size: 19px; color: var(--ink-soft); letter-spacing: -0.01em;
+    font-family: 'Spectral', serif; font-weight: 500;
+    font-size: 26px; line-height: 1.15; letter-spacing: -0.01em;
+    color: var(--ink-soft); margin: 0;
   }
 
   .topnav {
@@ -114,12 +119,28 @@
   .view.is-active { display: block; }
 
   /* === Lead === */
-  .lead { margin-bottom: 48px; }
+  .lead {
+    margin-bottom: 48px; display: grid;
+    grid-template-columns: 2.2fr 1fr; gap: 48px;
+  }
   .lead-main p {
     font-family: 'Spectral', serif; font-size: 17px; line-height: 1.55;
     color: var(--ink-soft); margin-bottom: 14px;
   }
   .lead-main p strong { color: var(--ink); font-weight: 600; }
+  .lead-side {
+    border-left: 3px solid var(--ink); padding: 4px 0 4px 22px;
+  }
+  .lead-side h4 {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint);
+    margin: 0 0 8px;
+  }
+  .lead-side h4:not(:first-child) { margin-top: 18px; }
+  .lead-side p {
+    font-family: 'Spectral', serif; font-size: 14px;
+    line-height: 1.55; color: var(--ink-soft); margin: 0 0 10px;
+  }
 
   /* === Overview stats === */
   .overview-stats {
@@ -137,7 +158,8 @@
     font-size: 42px; line-height: 1; color: var(--ink);
     letter-spacing: -0.02em;
   }
-  .ostat-accent .ostat-value { color: var(--accent); }
+  /* Priority/Excluded stat numbers stay in default ink — bucket colors
+     are only used on the dots and chips, not the masthead counts. */
   .ostat-sub {
     font-family: 'IBM Plex Mono', monospace; font-size: 21px;
     color: var(--ink-faint); margin-top: 10px; letter-spacing: 0.02em;
@@ -750,8 +772,8 @@
     </div>
 
     <div class="title-block">
-      <h1 class="title">Pathogen Risk Screening</h1>
-      <p class="title-secondary">An interactive companion to the World Cup 2026 threat-assessment protocol.</p>
+      <h1 class="title">FIFA World Cup 2026</h1>
+      <h2 class="title-secondary">Interactive Pathogen Risk Screening Dashboard</h2>
     </div>
 
     <nav class="topnav">
@@ -774,11 +796,14 @@
     <section class="lead">
       <div class="lead-main">
         <p>
-          We track <strong id="lead-n-total">—</strong> pathogens against the
-          World Cup 2026 threat-assessment protocol. Each is screened through a
-          sequence of yes/no questions — endemicity, increased transmission at WC
-          venues, importation pressure, vector competence, healthcare-only spread
-          — before computing a per-case outbreak size and an excess-risk score.
+          We evaluated <strong id="lead-n-total">—</strong> pathogens using a standardized
+          threat assessment protocol. This protocol considers whether a pathogen is currently
+          present in the United States, it potential to become endemic if not, the number of 
+          expected importations, a pathogens's potential for onward transmission, and the impact
+          of each infection (see About & Methodology). The, often pessimistic, assumptions
+          we use are sometimes open for debate. For this reason, we you the ability to modify 
+          the values we use in the screening, or add new pathogens, to see how that changes
+          the screening results. 
         </p>
         <p>
           Click any row to inspect the decision in full and <em>override</em>
@@ -786,6 +811,12 @@
           locally in your browser.
         </p>
       </div>
+      <aside class="lead-side">
+        <h4>What this dashboard does</h4>
+        <p>Apply a standard protocol based on pathogen characteristics, impact and simple epidemic simulations to identify "priority" pathogens worth monitoring during the  2026 FIFA World Cup. </p>
+        <h4>What it does not do</h4>
+        <p>Measure the absolute risk posed by a pathogen during the period of the tournament, or provide a definitive forecasts of a pathogens presence. </p>
+      </aside>
     </section>
 
     <section class="overview-stats" id="overview-stats">
@@ -808,12 +839,12 @@
 
     <section>
       <h2 class="overview-section-h">All pathogens</h2>
-      <p class="overview-note">Sorted by status, then alphabetically. Click any row for full detail.</p>
+      <p class="overview-note">Sorted alphabetically. Click any row for full detail.</p>
 
       <div class="filter-bar" id="filter-bar">
-        <button class="filter-chip is-active" data-filter="all">All <span class="filter-count" id="count-all"></span></button>
-        <button class="filter-chip" data-filter="priority">Priority <span class="filter-count" id="count-priority"></span></button>
+        <button class="filter-chip is-active" data-filter="priority">Priority <span class="filter-count" id="count-priority"></span></button>
         <button class="filter-chip" data-filter="excluded">Excluded <span class="filter-count" id="count-excluded"></span></button>
+        <button class="filter-chip" data-filter="all">All <span class="filter-count" id="count-all"></span></button>
         <span class="filter-spacer"></span>
         <button class="reset-all-btn" id="reset-all-btn" disabled>Reset all overrides</button>
       </div>
@@ -1433,21 +1464,16 @@
   // ====================================================================
   //  Overview view
   // ====================================================================
-  const ORDER = { priority: 0, under_eval: 1, excluded: 2, unassessed: 3 };
-
   function sortedEntries(filter) {
-    // Pull every pathogen — curated + user-added — and sort by EFFECTIVE
-    // bucket so overrides / sims / custom additions all surface correctly.
-    return Array.from(BASELINE.values()).sort((a, b) => {
-      const ea = effectiveDecision(a.name).bucket;
-      const eb = effectiveDecision(b.name).bucket;
-      const da = ORDER[ea] ?? 9, db = ORDER[eb] ?? 9;
-      if (da !== db) return da - db;
-      return a.name.localeCompare(b.name);
-    }).filter(p => {
-      if (filter === 'all') return true;
-      return effectiveDecision(p.name).bucket === filter;
-    });
+    // Sort all pathogens alphabetically by name. (Bucket ordering is
+    // implicit when a bucket filter is active — the filter narrows to
+    // one bucket, so name order is the only useful axis.)
+    return Array.from(BASELINE.values())
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .filter(p => {
+        if (filter === 'all') return true;
+        return effectiveDecision(p.name).bucket === filter;
+      });
   }
 
   function statTile(label, value) {
@@ -1498,7 +1524,7 @@
     `;
   }
 
-  let currentFilter = 'all';
+  let currentFilter = 'priority';
 
   function renderOverview() {
     // Tiles report curated screening; per-tile "+N custom" sublines surface
