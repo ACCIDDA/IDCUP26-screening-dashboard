@@ -502,6 +502,28 @@
   }
   .about-body p { margin-bottom: 12px; }
   .about-body strong { color: var(--ink); font-weight: 600; }
+  .about-tree-h {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 18px 0 10px;
+  }
+  .about-tree-svg {
+    display: block; width: 100%; height: auto; margin-bottom: 18px;
+    font-family: 'Spectral', serif;
+  }
+  .about-tree-svg .nbox       { fill: var(--paper); stroke: var(--ink-faint); stroke-width: 1; }
+  .about-tree-svg .ntext      { font-size: 12px; fill: var(--ink); text-anchor: middle; }
+  .about-tree-svg .nedge      { stroke: var(--ink-faint); stroke-width: 1; fill: none; }
+  .about-tree-svg .nlabel     {
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    fill: var(--ink-faint); letter-spacing: 0.08em; text-anchor: middle;
+  }
+  .about-tree-svg .nout-pri   { fill: var(--priority); stroke: var(--priority); }
+  .about-tree-svg .nout-exc   { fill: var(--excluded); stroke: var(--excluded); }
+  .about-tree-svg .nout-text  {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    fill: var(--paper); letter-spacing: 0.08em; text-anchor: middle; font-weight: 500;
+  }
   .about-body code {
     font-family: 'IBM Plex Mono', monospace; font-size: 13px;
     background: var(--paper-tint); padding: 1px 5px; color: var(--ink);
@@ -838,7 +860,7 @@
     </section>
 
     <section>
-      <h2 class="overview-section-h">All pathogens</h2>
+      <h2 class="overview-section-h" id="overview-section-h">Priority pathogens</h2>
       <p class="overview-note">Sorted alphabetically. Click any row for full detail.</p>
 
       <div class="filter-bar" id="filter-bar">
@@ -892,6 +914,85 @@
         score combines importation pressure, per-case outbreak size, and per-case
         impact.
       </p>
+      <div class="about-tree-h">Screening flow</div>
+      <svg class="about-tree-svg" viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" aria-label="Decision tree: how a pathogen reaches priority or excluded">
+        <!-- Root -->
+        <rect class="nbox" x="240" y="10" width="160" height="34" rx="2"/>
+        <text class="ntext" x="320" y="32">Endemic in the US?</text>
+
+        <!-- Root → branch 1 / branch 2 -->
+        <path class="nedge" d="M 320 44 L 320 64 L 160 64 L 160 84"/>
+        <path class="nedge" d="M 320 64 L 480 64 L 480 84"/>
+        <text class="nlabel" x="240" y="60">YES</text>
+        <text class="nlabel" x="400" y="60">NO</text>
+
+        <!-- Layer 1 questions -->
+        <rect class="nbox" x="40" y="84" width="240" height="54" rx="2"/>
+        <text class="ntext" x="160" y="106">Increased WC transmission</text>
+        <text class="ntext" x="160" y="124">OR imports &gt; 5% of US prevalence?</text>
+
+        <rect class="nbox" x="360" y="84" width="240" height="54" rx="2"/>
+        <text class="ntext" x="480" y="106">Can establish local transmission</text>
+        <text class="ntext" x="480" y="124">with expected imports &gt; 0?</text>
+
+        <!-- Layer 1 → Layer 2 -->
+        <path class="nedge" d="M 160 138 L 160 162 L 80 162 L 80 184"/>
+        <path class="nedge" d="M 160 162 L 240 162 L 240 184"/>
+        <text class="nlabel" x="116" y="158">YES</text>
+        <text class="nlabel" x="208" y="158">NO</text>
+
+        <path class="nedge" d="M 480 138 L 480 162 L 400 162 L 400 184"/>
+        <path class="nedge" d="M 480 162 L 560 162 L 560 184"/>
+        <text class="nlabel" x="436" y="158">YES</text>
+        <text class="nlabel" x="528" y="158">NO</text>
+
+        <!-- Layer 2 boxes -->
+        <rect class="nbox" x="10" y="184" width="140" height="40" rx="2"/>
+        <text class="ntext" x="80" y="201">Excess risk</text>
+        <text class="ntext" x="80" y="217">&gt; Q threshold?</text>
+
+        <rect class="nbox nout-exc" x="200" y="194" width="80" height="28" rx="2"/>
+        <text class="nout-text" x="240" y="213">EXCLUDE</text>
+
+        <rect class="nbox nout-pri" x="360" y="194" width="80" height="28" rx="2"/>
+        <text class="nout-text" x="400" y="213">PRIORITIZE</text>
+
+        <rect class="nbox" x="490" y="184" width="140" height="40" rx="2"/>
+        <text class="ntext" x="560" y="201">Excess risk</text>
+        <text class="ntext" x="560" y="217">&gt; Q threshold?</text>
+
+        <!-- Layer 2 → Layer 3 outcomes -->
+        <path class="nedge" d="M 80 224 L 80 246 L 36 246 L 36 268"/>
+        <path class="nedge" d="M 80 246 L 140 246 L 140 268"/>
+        <text class="nlabel" x="58" y="262">YES</text>
+        <text class="nlabel" x="110" y="262">NO</text>
+
+        <path class="nedge" d="M 560 224 L 560 246 L 500 246 L 500 268"/>
+        <path class="nedge" d="M 560 246 L 604 246 L 604 268"/>
+        <text class="nlabel" x="530" y="262">YES</text>
+        <text class="nlabel" x="582" y="262">NO</text>
+
+        <!-- Layer 3 outcomes (spaced apart for readability) -->
+        <rect class="nbox nout-pri" x="0"   y="268" width="72" height="28" rx="2"/>
+        <text class="nout-text"     x="36"  y="287">PRIORITIZE</text>
+
+        <rect class="nbox nout-exc" x="104" y="268" width="72" height="28" rx="2"/>
+        <text class="nout-text"     x="140" y="287">EXCLUDE</text>
+
+        <rect class="nbox nout-pri" x="464" y="268" width="72" height="28" rx="2"/>
+        <text class="nout-text"     x="500" y="287">PRIORITIZE</text>
+
+        <rect class="nbox nout-exc" x="568" y="268" width="72" height="28" rx="2"/>
+        <text class="nout-text"     x="604" y="287">EXCLUDE</text>
+      </svg>
+      <p style="font-size:13px; color:var(--ink-faint); margin-top:-6px;">
+        Simplified view of the protocol. Q (the risk threshold, default <code>$25,000</code>)
+        is retunable from the masthead. The full screening also records
+        intermediate flags — dead-end-host, vector competence, healthcare-only
+        spread — that inform the curator's reasoning even when they don't
+        change the bucket.
+      </p>
+
       <p>
         Each pathogen lands in one of two buckets:
       </p>
@@ -1567,6 +1668,15 @@
     document.getElementById('entries').innerHTML =
       sortedEntries(currentFilter).map(renderEntry).join('');
 
+    // Section header tracks the active filter.
+    const SECTION_HEADINGS = {
+      priority: 'Priority pathogens',
+      excluded: 'Excluded pathogens',
+      all:      'All pathogens',
+    };
+    document.getElementById('overview-section-h').textContent =
+      SECTION_HEADINGS[currentFilter] || 'All pathogens';
+
     // Reset-all button: enabled only when any overrides exist.
     document.getElementById('reset-all-btn').disabled =
       Object.keys(OVERRIDES).length === 0;
@@ -1988,10 +2098,9 @@
 
     host.innerHTML = `
       <p class="custom-intro">
-        Add a pathogen that's <strong>not</strong> in the curated list — to
-        explore how it would fall through the screening protocol with your
-        own inputs. The new entry lives only in your browser (not the
-        source sheet), and is treated like any curated row from there: it
+        Add your own pathogen to explore how it would be evaluated in the
+        screening protocol. The new entry lives only in your browser (no one else can see it), 
+        and is treated like any curated row from there: it
         appears in the overview, gets the same screening + simulation +
         override tooling, and can be removed at any time.
       </p>
