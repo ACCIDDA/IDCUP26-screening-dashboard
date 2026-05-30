@@ -1,15 +1,15 @@
 #!/usr/bin/env Rscript
 # Project the Risk Filtering sheet to a normalized JSON payload for the
-# dashboard. Reads the cached snapshot from the sibling wc-threat-assessment
-# repo so we don't re-hit the Google Sheet at mockup time. The real build
-# will refresh on demand.
+# dashboard. Reads the cached RDS produced by load_sheet.R in the sibling
+# wc-threat-assessment repo. Refresh that cache (refresh = TRUE in
+# load_risk_filtering()) when you want fresh sheet data.
 
 suppressPackageStartupMessages({
   library(jsonlite)
   library(data.table)
 })
 
-# Look for the cached sheet snapshot. Env var wins; otherwise try a few
+# Look for the cached sheet RDS. Env var wins; otherwise try a few
 # common sibling locations. Override:
 #   WC_RISK_FILTERING_RDS=/path/to/risk_filtering.rds Rscript scripts/extract_pathogens.R
 candidates <- c(
@@ -23,7 +23,7 @@ if (is.null(src)) stop(
   "sibling of wc-threat-assessment.")
 src <- normalizePath(src, mustWork = TRUE)
 dt  <- readRDS(src)
-message("Loaded snapshot: ", src)
+message("Loaded sheet cache: ", src)
 
 yn  <- function(x) tolower(trimws(as.character(x))) %in% "yes"
 yn3 <- function(x) {
@@ -47,8 +47,6 @@ out <- data.table(
   name                    = dt$Pathogen,
   endemic                 = yn(dt$Endemicity),
   priority_label          = dt$`Priority Pathogen?`,
-  inputer                 = dt$Inputer,
-  reviewer                = dt$Reviewer,
 
   # Screening flags (tri-state)
   can_establish           = yn3(dt$`[1] Establish local transmission?`),
@@ -126,10 +124,10 @@ threshold_q <- tryCatch({
   as.numeric(hdr[[2]][[1]])
 }, error = function(e) { message("Couldn't fetch threshold; using 25000."); 25000 })
 
-# Snapshot metadata; surfaces in the masthead "data as of" line.
+# Dataset metadata; surfaces in the masthead "last updated" line.
 meta <- list(
   source       = "Risk Filtering sheet, ID 1yOX57P2DUxP-Td83W3zSq2MgF2keOftd3_Ejk8cGvYo",
-  snapshot_at  = format(file.info(src)$mtime, "%Y-%m-%d"),
+  data_as_of   = format(file.info(src)$mtime, "%Y-%m-%d"),
   n_pathogens  = nrow(out),
   threshold_q  = threshold_q,
   generated_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%S%z")
@@ -141,8 +139,8 @@ dir.create("data", showWarnings = FALSE)
 writeLines(toJSON(payload, na = "null", auto_unbox = TRUE, pretty = TRUE),
            "data/pathogens.json")
 
-cat(sprintf("Wrote data/pathogens.json (%d pathogens, snapshot %s)\n",
-            nrow(out), meta$snapshot_at))
+cat(sprintf("Wrote data/pathogens.json (%d pathogens, data as of %s)\n",
+            nrow(out), meta$data_as_of))
 cat(sprintf("Decision tags: %s\n",
             paste(sprintf("%s=%d", names(table(decision)), table(decision)),
                   collapse = "  ")))

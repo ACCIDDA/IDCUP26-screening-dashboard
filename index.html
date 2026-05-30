@@ -114,23 +114,12 @@
   .view.is-active { display: block; }
 
   /* === Lead === */
-  .lead { margin-bottom: 48px; display: grid; grid-template-columns: 2fr 1fr; gap: 36px; }
+  .lead { margin-bottom: 48px; }
   .lead-main p {
     font-family: 'Spectral', serif; font-size: 17px; line-height: 1.55;
     color: var(--ink-soft); margin-bottom: 14px;
   }
   .lead-main p strong { color: var(--ink); font-weight: 600; }
-  .lead-side {
-    padding: 20px 22px; border: 1px solid var(--rule); background: var(--paper-tint);
-  }
-  .lead-side-h {
-    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px;
-  }
-  .lead-side p {
-    font-family: 'Spectral', serif; font-size: 14px; line-height: 1.55;
-    color: var(--ink-soft); margin-bottom: 10px;
-  }
 
   /* === Overview stats === */
   .overview-stats {
@@ -797,11 +786,6 @@
           locally in your browser.
         </p>
       </div>
-      <aside class="lead-side">
-        <div class="lead-side-h">Snapshot</div>
-        <p>Data are a frozen snapshot of the curated Risk Filtering sheet, not a live read. Releases are tagged against the sheet date.</p>
-        <p style="margin-bottom:0;"><span id="lead-snapshot-date" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);"></span></p>
-      </aside>
     </section>
 
     <section class="overview-stats" id="overview-stats">
@@ -851,7 +835,7 @@
 
   <div class="footnote-block">
     <p class="footnote">
-      Mockup &nbsp;·&nbsp; Data: Risk Filtering sheet snapshot <span id="footer-snapshot">—</span>
+      Data: Risk Filtering sheet, last updated <span id="footer-data-date">—</span>
       &nbsp;·&nbsp; Companion to the narrative walkthrough
     </p>
   </div>
@@ -904,9 +888,9 @@
         removed from their detail page.
       </p>
       <p>
-        Data shown are a <strong>frozen snapshot</strong> of the curated Risk Filtering
-        sheet, not a live read. Releases of this dashboard are tagged against the
-        sheet date so prior snapshots remain browsable.
+        Data are sourced from the curated Risk Filtering sheet. The "last
+        updated" date in the masthead reflects when the dataset was last
+        regenerated from the sheet.
       </p>
       <p>
         Companion to the <a href="#" style="color:var(--accent);">narrative walkthrough</a>
@@ -919,18 +903,16 @@
 <script id="pathogen-data" type="application/json">{
   "meta": {
     "source": "Risk Filtering sheet, ID 1yOX57P2DUxP-Td83W3zSq2MgF2keOftd3_Ejk8cGvYo",
-    "snapshot_at": "2026-05-26",
+    "data_as_of": "2026-05-26",
     "n_pathogens": 77,
     "threshold_q": 25000,
-    "generated_at": "2026-05-26T21:55:29-0400"
+    "generated_at": "2026-05-29T21:59:09-0400"
   },
   "pathogens": [
     {
       "name": "Anaplasmosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -975,8 +957,6 @@
       "name": "Anthrax",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1021,8 +1001,6 @@
       "name": "Babesiosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1067,8 +1045,6 @@
       "name": "Bacillus cereus",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1113,8 +1089,6 @@
       "name": "Brucellosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1159,8 +1133,6 @@
       "name": "C. perfringens",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1205,8 +1177,6 @@
       "name": "CCHF",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -1251,8 +1221,6 @@
       "name": "COVID-19",
       "endemic": true,
       "priority_label": "Included",
-      "inputer": "Praachi",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -1297,8 +1265,6 @@
       "name": "CPO (Carbapenemase)",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1343,8 +1309,6 @@
       "name": "Candida auris",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1389,8 +1353,6 @@
       "name": "Chickenpox",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -1435,8 +1397,6 @@
       "name": "Chikungunya",
       "endemic": false,
       "priority_label": "Included",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": "yes",
       "wc_elev_transmit": null,
       "imports_gt_5pct": null,
@@ -1481,8 +1441,6 @@
       "name": "Cholera",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -1527,8 +1485,6 @@
       "name": "Cryptosporidiosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1573,8 +1529,6 @@
       "name": "Cyclosporiasis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1619,8 +1573,6 @@
       "name": "Dengue",
       "endemic": false,
       "priority_label": "Included",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": "yes",
       "wc_elev_transmit": null,
       "imports_gt_5pct": null,
@@ -1665,8 +1617,6 @@
       "name": "Diphtheria",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -1711,8 +1661,6 @@
       "name": "E. coli (STEC)",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1757,8 +1705,6 @@
       "name": "Ebola (EVD) [outbreak/hypothetical]",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -1803,8 +1749,6 @@
       "name": "Ehrlichiosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1849,8 +1793,6 @@
       "name": "Giardiasis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1895,8 +1837,6 @@
       "name": "Glanders (B. mallei)",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -1941,8 +1881,6 @@
       "name": "HIV",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kim",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -1987,8 +1925,6 @@
       "name": "HPAI (H5N1)",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2033,8 +1969,6 @@
       "name": "Hand Foot & Mouth",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2079,8 +2013,6 @@
       "name": "Hantavirus (Andes Virus) [scenario]",
       "endemic": false,
       "priority_label": "Included",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -2125,8 +2057,6 @@
       "name": "Hendra Virus",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -2171,8 +2101,6 @@
       "name": "Hepatitis A",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2217,8 +2145,6 @@
       "name": "Hepatitis B",
       "endemic": true,
       "priority_label": "Included",
-      "inputer": "Claire/Praachi",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "yes",
@@ -2263,8 +2189,6 @@
       "name": "Hepatitis C",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -2309,8 +2233,6 @@
       "name": "Hepatitis E",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2355,8 +2277,6 @@
       "name": "Lassa Fever",
       "endemic": false,
       "priority_label": "Included",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -2401,8 +2321,6 @@
       "name": "Legionella",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2431,7 +2349,7 @@
       "dalys_per_case": null,
       "symp_proportion": null,
       "incidence_per_100k": null,
-      "excl_endemic_no_wc_transmit": false,
+      "excl_endemic_no_wc_transmit": true,
       "excl_endemic_no_acute": false,
       "excl_endemic_risk_below": false,
       "incl_endemic_risk_above": false,
@@ -2447,8 +2365,6 @@
       "name": "Leptospirosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2493,8 +2409,6 @@
       "name": "Listeriosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2539,8 +2453,6 @@
       "name": "Lyme Disease",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2585,8 +2497,6 @@
       "name": "MERS-CoV",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -2631,8 +2541,6 @@
       "name": "MRSA",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2677,8 +2585,6 @@
       "name": "Malaria",
       "endemic": false,
       "priority_label": "Included",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": "yes",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -2723,8 +2629,6 @@
       "name": "Marburg (MVD) [Hypothetical]",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Claire/Justin",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -2769,8 +2673,6 @@
       "name": "Measles",
       "endemic": true,
       "priority_label": "Included",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": "yes",
@@ -2815,8 +2717,6 @@
       "name": "Melioidosis (B. pseudomallei)",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2861,8 +2761,6 @@
       "name": "Meningococcal",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2907,8 +2805,6 @@
       "name": "Mpox Clade IIb",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -2953,8 +2849,6 @@
       "name": "Mpox Clade Ib",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -2999,8 +2893,6 @@
       "name": "Mumps",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -3045,8 +2937,6 @@
       "name": "Nipah Virus",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -3091,8 +2981,6 @@
       "name": "Norovirus",
       "endemic": true,
       "priority_label": "Included",
-      "inputer": "Praachi",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -3137,8 +3025,6 @@
       "name": "Novel Resp. Virus (including novel influenza)  [scenario]",
       "endemic": false,
       "priority_label": "Included",
-      "inputer": "Praachi",
-      "reviewer": "Justin",
       "can_establish": "yes",
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -3183,8 +3069,6 @@
       "name": "Oropouche",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": "Justin",
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -3229,8 +3113,6 @@
       "name": "Paratyphoid Fever",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -3275,8 +3157,6 @@
       "name": "Pertussis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -3321,8 +3201,6 @@
       "name": "Plague (Y. pestis)",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -3367,8 +3245,6 @@
       "name": "Pneumonia (Bacterial)",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Praachi",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -3413,8 +3289,6 @@
       "name": "Polio",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -3459,8 +3333,6 @@
       "name": "Psittacosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -3505,8 +3377,6 @@
       "name": "Q Fever",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -3551,8 +3421,6 @@
       "name": "RSV",
       "endemic": true,
       "priority_label": "Included",
-      "inputer": "Praachi",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -3597,8 +3465,6 @@
       "name": "Rabies",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -3643,8 +3509,6 @@
       "name": "Ricin (Toxin)",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": null,
       "imports_gt_5pct": null,
@@ -3689,8 +3553,6 @@
       "name": "Rubella",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Claire",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -3735,8 +3597,6 @@
       "name": "Salmonella",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -3781,8 +3641,6 @@
       "name": "Seasonal Influenza (A/B)",
       "endemic": true,
       "priority_label": "Included",
-      "inputer": "Praachi",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -3827,8 +3685,6 @@
       "name": "Shigellosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Praachi",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -3873,8 +3729,6 @@
       "name": "Smallpox",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": "no",
       "wc_elev_transmit": null,
       "imports_gt_5pct": null,
@@ -3919,8 +3773,6 @@
       "name": "Spotted Fever (RMSF)",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby/Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -3965,8 +3817,6 @@
       "name": "St. Louis Enceph.",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby/Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -4011,8 +3861,6 @@
       "name": "Syphilis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kim",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -4057,8 +3905,6 @@
       "name": "Trichinellosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -4103,8 +3949,6 @@
       "name": "Tuberculosis (TB)",
       "endemic": true,
       "priority_label": "Included",
-      "inputer": "Praachi",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "yes",
       "imports_gt_5pct": null,
@@ -4149,8 +3993,6 @@
       "name": "Tularemia",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -4195,8 +4037,6 @@
       "name": "Typhoid Fever",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": "Justin",
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -4241,8 +4081,6 @@
       "name": "VRSA",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Justin",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -4287,8 +4125,6 @@
       "name": "Vibriosis",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Kelly",
-      "reviewer": "Justin",
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -4333,8 +4169,6 @@
       "name": "West Nile Virus",
       "endemic": true,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": null,
       "wc_elev_transmit": "no",
       "imports_gt_5pct": "no",
@@ -4379,8 +4213,6 @@
       "name": "Yellow Fever",
       "endemic": false,
       "priority_label": "Excluded",
-      "inputer": "Abby",
-      "reviewer": "Justin",
       "can_establish": "no",
       "wc_elev_transmit": "no",
       "imports_gt_5pct": null,
@@ -4425,8 +4257,6 @@
       "name": "Zika",
       "endemic": false,
       "priority_label": "Included",
-      "inputer": "Abby",
-      "reviewer": null,
       "can_establish": "yes",
       "wc_elev_transmit": null,
       "imports_gt_5pct": null,
@@ -4532,7 +4362,7 @@
   function blankPathogen(name, endemic) {
     return {
       name, endemic: !!endemic,
-      priority_label: null, inputer: null, reviewer: null,
+      priority_label: null,
       can_establish: null, wc_elev_transmit: null, imports_gt_5pct: null,
       dead_end_host: null, vector_absent: null, healthcare_only: null,
       R0: null, WC_R0: null, k: null, g: null, S: null,
@@ -5434,10 +5264,6 @@
           <strong>Baseline excess cases:</strong> ${fmt(base.excess_outbreak_cases) ?? '—'} &nbsp;·&nbsp;
           <strong>Baseline risk value:</strong> ${fmtMoney(base.risk_value)}
         </div>
-        <div style="margin-top:6px;">
-          <strong>Inputer:</strong> ${escapeHtml(base.inputer || '—')} &nbsp;·&nbsp;
-          <strong>Reviewer:</strong> ${escapeHtml(base.reviewer || '—')}
-        </div>
       </div>
     `;
 
@@ -5685,8 +5511,7 @@
   // ====================================================================
   //  Wire-up
   // ====================================================================
-  document.getElementById('lead-snapshot-date').textContent = META.snapshot_at;
-  document.getElementById('footer-snapshot').textContent    = META.snapshot_at;
+  document.getElementById('footer-data-date').textContent = META.data_as_of;
 
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {

@@ -114,23 +114,12 @@
   .view.is-active { display: block; }
 
   /* === Lead === */
-  .lead { margin-bottom: 48px; display: grid; grid-template-columns: 2fr 1fr; gap: 36px; }
+  .lead { margin-bottom: 48px; }
   .lead-main p {
     font-family: 'Spectral', serif; font-size: 17px; line-height: 1.55;
     color: var(--ink-soft); margin-bottom: 14px;
   }
   .lead-main p strong { color: var(--ink); font-weight: 600; }
-  .lead-side {
-    padding: 20px 22px; border: 1px solid var(--rule); background: var(--paper-tint);
-  }
-  .lead-side-h {
-    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px;
-  }
-  .lead-side p {
-    font-family: 'Spectral', serif; font-size: 14px; line-height: 1.55;
-    color: var(--ink-soft); margin-bottom: 10px;
-  }
 
   /* === Overview stats === */
   .overview-stats {
@@ -797,11 +786,6 @@
           locally in your browser.
         </p>
       </div>
-      <aside class="lead-side">
-        <div class="lead-side-h">Snapshot</div>
-        <p>Data are a frozen snapshot of the curated Risk Filtering sheet, not a live read. Releases are tagged against the sheet date.</p>
-        <p style="margin-bottom:0;"><span id="lead-snapshot-date" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);"></span></p>
-      </aside>
     </section>
 
     <section class="overview-stats" id="overview-stats">
@@ -851,7 +835,7 @@
 
   <div class="footnote-block">
     <p class="footnote">
-      Mockup &nbsp;·&nbsp; Data: Risk Filtering sheet snapshot <span id="footer-snapshot">—</span>
+      Data: Risk Filtering sheet, last updated <span id="footer-data-date">—</span>
       &nbsp;·&nbsp; Companion to the narrative walkthrough
     </p>
   </div>
@@ -904,9 +888,9 @@
         removed from their detail page.
       </p>
       <p>
-        Data shown are a <strong>frozen snapshot</strong> of the curated Risk Filtering
-        sheet, not a live read. Releases of this dashboard are tagged against the
-        sheet date so prior snapshots remain browsable.
+        Data are sourced from the curated Risk Filtering sheet. The "last
+        updated" date in the masthead reflects when the dataset was last
+        regenerated from the sheet.
       </p>
       <p>
         Companion to the <a href="#" style="color:var(--accent);">narrative walkthrough</a>
@@ -979,7 +963,7 @@
   function blankPathogen(name, endemic) {
     return {
       name, endemic: !!endemic,
-      priority_label: null, inputer: null, reviewer: null,
+      priority_label: null,
       can_establish: null, wc_elev_transmit: null, imports_gt_5pct: null,
       dead_end_host: null, vector_absent: null, healthcare_only: null,
       R0: null, WC_R0: null, k: null, g: null, S: null,
@@ -1881,10 +1865,6 @@
           <strong>Baseline excess cases:</strong> ${fmt(base.excess_outbreak_cases) ?? '—'} &nbsp;·&nbsp;
           <strong>Baseline risk value:</strong> ${fmtMoney(base.risk_value)}
         </div>
-        <div style="margin-top:6px;">
-          <strong>Inputer:</strong> ${escapeHtml(base.inputer || '—')} &nbsp;·&nbsp;
-          <strong>Reviewer:</strong> ${escapeHtml(base.reviewer || '—')}
-        </div>
       </div>
     `;
 
@@ -2132,8 +2112,7 @@
   // ====================================================================
   //  Wire-up
   // ====================================================================
-  document.getElementById('lead-snapshot-date').textContent = META.snapshot_at;
-  document.getElementById('footer-snapshot').textContent    = META.snapshot_at;
+  document.getElementById('footer-data-date').textContent = META.data_as_of;
 
   document.querySelectorAll('.filter-chip').forEach(chip => {
     chip.addEventListener('click', () => {
