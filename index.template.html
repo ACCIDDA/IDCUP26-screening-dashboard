@@ -856,10 +856,10 @@
     </nav>
 
     <div class="masthead-settings">
-      <span class="setting-label">Risk threshold Q</span>
+      <span class="setting-label">Inclusion threshold</span>
       <input type="number" class="setting-input" id="threshold-q" step="any" inputmode="decimal">
       <span class="setting-aux">USD &nbsp;·&nbsp; default <span id="threshold-q-default">—</span></span>
-      <button class="setting-reset" id="threshold-q-reset" title="Reset Q to default">reset</button>
+      <button class="setting-reset" id="threshold-q-reset" title="Reset inclusion threshold to default">reset</button>
     </div>
   </header>
 
@@ -873,10 +873,10 @@
           threat assessment protocol. This protocol considers whether a pathogen is currently
           present in the United States, it potential to become endemic if not, the number of 
           expected importations, a pathogens's potential for onward transmission, and the impact
-          of each infection (see About & Methodology). The, often pessimistic, assumptions
-          we use are sometimes open for debate. For this reason, we you the ability to modify 
-          the values we use in the screening, or add new pathogens, to see how that changes
-          the screening results. 
+          of each infection (see About & Methodology). Some of the assumptions used are debatable, 
+          and tend toward the pessimistic. For this reason, we give you the ability to modify 
+          the values we use in the screening, or add new pathogens, to see how those changes
+          affect the results. 
         </p>
         <p>
           Click any row to inspect the decision in full and <em>override</em>
@@ -886,7 +886,7 @@
       </div>
       <aside class="lead-side">
         <h4>What this dashboard does</h4>
-        <p>Apply a standard protocol based on pathogen characteristics, impact and simple epidemic simulations to identify "priority" pathogens worth monitoring during the  2026 FIFA World Cup. </p>
+        <p>Apply a standard protocol based on pathogen characteristics, impact and simple epidemic simulations to identify "priority" pathogens that may warrant monitoring during the  2026 FIFA World Cup. </p>
         <h4>What it does not do</h4>
         <p>Measure the absolute risk posed by a pathogen during the period of the tournament, or provide a definitive forecasts of a pathogens presence. </p>
       </aside>
@@ -958,12 +958,13 @@
     </div>
     <div class="about-body">
       <p>
-        This dashboard surfaces, in interactive form, the screening described in the
-        <strong>ACCIDDA / Insight Net Threat Assessment Protocol</strong> for the 2026
-        FIFA World Cup. Each tracked pathogen is screened against a sequence of
-        questions; for those that survive screening, a quantitative excess-risk
-        score combines importation pressure, per-case outbreak size, and per-case
-        impact.
+        This dashboard provides an interactive interface to browse and modify the
+        assumptions behind Insight Net's screening of the infectious-disease threat
+        posed to the United States by the 2026 FIFA World Cup. Working with the US CDC,
+        teams across Insight Net assessed <strong>77 pathogens</strong> across three
+        dimensions — <strong>excess importation risk, outbreak potential, and per-case
+        impact</strong> — to identify a short list of "priority" pathogens that may
+        warrant heightened monitoring during the tournament.
       </p>
       <div class="about-tree-h">Screening flow</div>
       <svg class="about-tree-svg" viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" aria-label="Decision tree: how a pathogen reaches priority or excluded">
@@ -1000,7 +1001,7 @@
         <!-- Layer 2 boxes -->
         <rect class="nbox" x="10" y="184" width="140" height="40" rx="2"/>
         <text class="ntext" x="80" y="201">Excess risk</text>
-        <text class="ntext" x="80" y="217">&gt; Q threshold?</text>
+        <text class="ntext" x="80" y="217">&gt; inclusion threshold?</text>
 
         <rect class="nbox nout-exc" x="200" y="194" width="80" height="28" rx="2"/>
         <text class="nout-text" x="240" y="213">EXCLUDE</text>
@@ -1010,7 +1011,7 @@
 
         <rect class="nbox" x="490" y="184" width="140" height="40" rx="2"/>
         <text class="ntext" x="560" y="201">Excess risk</text>
-        <text class="ntext" x="560" y="217">&gt; Q threshold?</text>
+        <text class="ntext" x="560" y="217">&gt; inclusion threshold?</text>
 
         <!-- Layer 2 → Layer 3 outcomes -->
         <path class="nedge" d="M 80 224 L 80 246 L 36 246 L 36 268"/>
@@ -1037,11 +1038,41 @@
         <text class="nout-text"     x="604" y="287">EXCLUDE</text>
       </svg>
       <p style="font-size:13px; color:var(--ink-faint); margin-top:-6px;">
-        Simplified view of the protocol. Q (the risk threshold, default <code>$25,000</code>)
-        is retunable from the masthead. The full screening also records
-        intermediate flags — dead-end-host, vector competence, healthcare-only
-        spread — that inform the curator's reasoning even when they don't
-        change the bucket.
+        Simplified schematic of the screening protocol; see Figure 2 of the
+        accompanying paper for the full version.
+      </p>
+
+      <p>
+        <strong>Excess importations.</strong> Baseline travel is estimated with the
+        GLEAM-EpiRisk metapopulation model on OAG flight data (~3,200 catchment areas
+        worldwide), reflecting typical June 2026 patterns. A World Cup travel surge is
+        layered on — a <strong>+20% increase</strong> from participating countries is
+        the primary scenario (+10% and +35% also modeled), routed to the host cities
+        where each team plays group-stage matches. Combined with source-country
+        surveillance (or, where unavailable, rate-based or analogous-pathogen
+        estimates), this yields expected monthly imported infections per pathogen. See 
+        the  <a href="https://epistorm.github.io/IDWC26-importation/" style="color:var(--accent);">importation-risk dashboard</a>
+        for a detailed exploration of importation risk. 
+      </p>
+      <p>
+        <strong>Outbreak potential.</strong> A branching-process model simulates spread
+        from a single introduction over a mass-gathering window of up to
+        <strong>17 days</strong> (the longest group-play span in one host city, plus two
+        days). Offspring are negative-binomial in R<sub>0</sub> and overdispersion
+        <em>k</em>, propagated across generations set by the generation time <em>g</em>,
+        assuming no susceptible depletion. World Cup transmission is amplified
+        <strong>1.2&times;</strong> over baseline (from 2022 Qatar World Cup COVID-19
+        data). Mean per-introduction outbreak size comes from 1 million simulations,
+        computed for both World Cup and baseline R<sub>0</sub>.
+      </p>
+      <p>
+        <strong>Excess infections and risk.</strong> Excess infections combine imported
+        infections &times; World Cup outbreak size with locally present infections
+        &times; (World Cup &minus; baseline outbreak size). Multiplying by
+        <strong>per-case impact</strong> — medical, public-health-response, and
+        productivity costs in US dollars (productivity via DALYs &times; US GDP per
+        capita where not directly reported) — gives the excess World Cup risk, compared
+        against the <strong>$25,000</strong> inclusion threshold.
       </p>
 
       <p>
@@ -1056,12 +1087,13 @@
         zero expected imports, imports not significant vs local prevalence, etc.).
       </p>
       <p>
-        Each pathogen page lets you <strong>override</strong> the screening
-        answers and parameter values, and <strong>re-run the simulation</strong>
-        to see how the per-case outbreak size and risk value respond. The global
-        <strong>Q threshold</strong> can be retuned from the masthead. Edits
-        live locally in your browser; they don't affect anyone else's view, and
-        they don't write back to the source sheet.
+        The global <strong>inclusion threshold</strong> (default <code>$25,000</code>,
+        the value used in the paper) is the per-pathogen excess-risk cutoff for
+        inclusion; it's retunable from the masthead. Each pathogen page lets you
+        <strong>override</strong> the screening answers and parameter values, and
+        <strong>re-run the simulation</strong> to see how the per-case outbreak size and
+        risk value respond. Edits live locally in your browser; they don't affect anyone
+        else's view, and they don't write back to the source sheet.
       </p>
       <p>
         The <strong>Add Your Own</strong> tab lets you enter a pathogen that
@@ -1069,15 +1101,6 @@
         simulation + risk-derivation tooling. User-added pathogens appear in
         the overview alongside the curated ones, tagged accordingly, and can be
         removed from their detail page.
-      </p>
-      <p>
-        Data are sourced from the curated Risk Filtering sheet. The "last
-        updated" date in the masthead reflects when the dataset was last
-        regenerated from the sheet.
-      </p>
-      <p>
-        Companion to the <a href="#" style="color:var(--accent);">narrative walkthrough</a>
-        and the <a href="https://epistorm.github.io/IDWC26-importation/" style="color:var(--accent);">importation-risk dashboard</a> from EPISTORM.
       </p>
     </div>
   </div>
@@ -1623,7 +1646,7 @@
 
     const wcr = p.risk_value;
     const wcrLabel = wcr == null ? '—' : fmtMoney(wcr);
-    push(`Risk value vs threshold Q = ${fmtMoney(q)}`, wcrLabel);
+    push(`Risk value vs inclusion threshold = ${fmtMoney(q)}`, wcrLabel);
 
     if (wcr == null || !paramsKnown || !costKnown) {
       const reason = wcr == null      ? 'pending_params'
